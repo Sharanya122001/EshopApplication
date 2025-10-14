@@ -1,6 +1,7 @@
-﻿using MinimalEshop.Application.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using MinimalEshop.Domain.Entities;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -8,13 +9,13 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder ProductAPI(this RouteGroupBuilder group)
         {
-            group.MapGet("/", async (ProductService _service) =>
+            group.MapGet("/", async ([FromServices] ProductService _service) =>
             {
                 var product = await _service.GetProductAsync();
                 return product;
             });
 
-            group.MapPost("/", async (ProductService _service, ProductDto productDto) =>
+            group.MapPost("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto) =>
             {
                 var product = new Product
                 {
@@ -28,35 +29,28 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return created;
             });
 
-
-
-            group.MapPut("/{ProductId}", async (int ProductId, ProductDto productDto, ProductService _service) =>
+            group.MapPut("/update", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto) =>
             {
                 var product = new Product
                 {
+                    ProductId = productDto.ProductId,
                     Name = productDto.Name,
                     Price = productDto.Price,
                     Description = productDto.Description,
                     CategoryId = productDto.CategoryId,
                     Addedon = productDto.Addedon
                 };
-                var updated = await _service.UpdateProductAsync(ProductId);
+
+                var updated = await _service.UpdateProductAsync(product);
                 return Results.Ok(updated);
             });
 
-            group.MapDelete("/{productId}", async (int ProductId, ProductDto productDto, ProductService _service) =>
+            group.MapDelete("/delete", async ([FromServices] ProductService _service, [FromQuery] string ProductId) =>
             {
-                var product = new Product
-                {
-                    Name = productDto.Name,
-                    Price = productDto.Price,
-                    Description = productDto.Description,
-                    CategoryId = productDto.CategoryId,
-                    Addedon = productDto.Addedon
-                };
-                var updated = await _service.DeleteProductAsync(ProductId);
-                return Results.Ok(updated);
+                var deleted = await _service.DeleteProductAsync(ProductId);
+                return Results.Ok(deleted);
             });
+
 
             return group;
         }

@@ -1,18 +1,32 @@
-﻿using System;
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+//using MinimalEshop.Application.DTO;
+//using MinimalEshop.Application.Domain.Entities;
+
+//namespace MinimalEshop.Application.Interface
+//{
+//    public interface IProduct
+//    {
+//        Task<List<Product>> GetAllAsync();
+//        Task<Product> AddAsync(Product product);
+//        Task<bool> UpdateAsync(Product product);
+//        Task<bool> DeleteAsync(string ProductId);
+//    }
+//}
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MinimalEshop.Application.DTO;
-using MinimalEshop.Domain.Entities;
+using MinimalEshop.Application.Domain.Entities;
 
 namespace MinimalEshop.Application.Interface
 {
     public interface IProduct
     {
-        Task<List<Product>> GetProductAsync();
-        Task<Product> CreateProductAsync(Product product);
-        Task<bool> UpdateProductAsync(int ProductId);
-        Task<bool> DeleteProductAsync(int ProductId);
+        Task<List<Product>> GetAllAsync();
+        Task<Product> AddAsync(Product product);
+        Task<bool> UpdateAsync(Product product);
+        Task<bool> DeleteAsync(string productId);
     }
 }

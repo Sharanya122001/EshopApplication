@@ -14,7 +14,7 @@ namespace MinimalEshop.Application.DTO
         public string Name { get; set; }
     }
 
-    public class AddToBasketResponseDto : AddToCartRequestDto
+    public class AddToCartResponseDto : AddToCartRequestDto
     {
         public string Message { get; set; }
     }

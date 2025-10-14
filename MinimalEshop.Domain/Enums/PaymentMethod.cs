@@ -1,0 +1,18 @@
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+
+//namespace MinimalEshop.Domain.Enums
+//{
+//        public enum PaymentMethod
+//        {
+//          Null,
+//          UPI,
+//          CashOnDelivery,
+//          NetBanking,
+//          Card,
+//        }
+//}
+

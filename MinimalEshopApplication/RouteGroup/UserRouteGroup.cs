@@ -1,6 +1,7 @@
-﻿using MinimalEshop.Application.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using MinimalEshop.Domain.Entities;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -8,7 +9,7 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder UserAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/Register", async(UserService _service, UserDto userDto) =>
+            group.MapPost("/Register", async([FromServices] UserService _service, [FromBody] UserDto userDto) =>
             {
                 var user = new User
                 {

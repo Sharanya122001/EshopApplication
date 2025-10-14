@@ -1,6 +1,7 @@
-﻿using MinimalEshop.Application.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using MinimalEshop.Domain.Entities;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -8,48 +9,52 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/checkout/{UserId}", async (OrderService _service, int UserId, OrderDto orderDto) =>
+            group.MapPost("/checkout", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
             {
                 var order = new Order
                 {
                     UserId = orderDto.UserId,
-                    OrderDate = orderDto.OrderDate,
+                    //OrderDate = orderDto.OrderDate,
                     TotalAmount = orderDto.TotalAmount,
                     Status = orderDto.Status
                 };
-                var checkout = await _service.CheckOutAsync(UserId);
-                return checkout;
+
+                var checkout = await _service.CheckOutAsync(orderDto.UserId);
+                return Results.Ok(checkout);
             });
 
-            group.MapPost("/{OrderId}/payment", async (OrderService _service, int OrderId, OrderDto orderDto) =>
+            group.MapPost("/payment", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
             {
                 var order = new Order
                 {
                     OrderId = orderDto.OrderId,
                     UserId = orderDto.UserId,
-                    OrderDate = orderDto.OrderDate,
+                    //OrderDate = orderDto.OrderDate,
                     TotalAmount = orderDto.TotalAmount,
                     Status = orderDto.Status
                 };
-                var paymentStatus = await _service.ProcessPaymentAsync(OrderId);
-                return paymentStatus;
+
+                var paymentStatus = await _service.ProcessPaymentAsync(orderDto.OrderId);
+                return Results.Ok(paymentStatus);
             });
 
-            group.MapGet("/{OrderId}", async (OrderService _service, int OrderId, OrderDto orderDto) =>
+            group.MapGet("/details", async ([FromServices] OrderService _service, [FromQuery] int orderId/*[FromBody] OrderDto orderDto*/) =>
             {
-                var order = new Order
-                {
-                    OrderId = orderDto.OrderId,
-                    UserId = orderDto.UserId,
-                    OrderDate = orderDto.OrderDate,
-                    TotalAmount = orderDto.TotalAmount,
-                    Status = orderDto.Status
-                };
-                var orderDetails = await _service.CheckOrderDetailsAsync(OrderId);
-                return orderDetails;    
+                //var order = new Order
+                //{
+                //    OrderId = orderDto.OrderId,
+                //    UserId = orderDto.UserId,
+                //    OrderDate = orderDto.OrderDate,
+                //    TotalAmount = orderDto.TotalAmount,
+                //    Status = orderDto.Status
+                //};
+
+                var orderDetails = await _service.CheckOrderDetailsAsync(orderId);
+                return Results.Ok(orderDetails);
             });
 
             return group;
         }
+
     }
 }

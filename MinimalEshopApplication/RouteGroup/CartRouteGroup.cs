@@ -1,6 +1,7 @@
-﻿using MinimalEshop.Application.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using MinimalEshop.Domain.Entities;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -8,7 +9,7 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/add", async (CartService _service, CartDto cartDto, int ProductId, int Quantity, int UserId) =>
+            group.MapPost("/add", async ([FromServices] CartService _service, [FromBody] CartDto cartDto) =>
             {
                 var cart = new Cart
                 {
@@ -17,11 +18,14 @@ namespace MinimalEshop.Presentation.RouteGroup
                     Quantity = cartDto.Quantity,
                     UserId = cartDto.UserId
                 };
-                var created = await _service.AddToCartAsync(ProductId, Quantity, UserId);
-                return created;
 
+                var created = await _service.AddToCartAsync(cartDto.ProductId, cartDto.Quantity, cartDto.UserId);
+
+                return Results.Ok(created);
             });
+
             return group;
         }
+
     }
 }

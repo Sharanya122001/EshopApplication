@@ -1,4 +1,4 @@
-﻿using MinimalEshop.Domain.Entities;
+﻿using MinimalEshop.Application.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,15 +8,19 @@ using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service
 {
-    public class UserService : IUser
+    public class UserService
     {
-        private readonly EshopDbcontext _context;
-        public RegisterUserService(EshopDbcontext context)
+        private readonly IUser _user;
+        public UserService(IUser user)
         {
-            _context = context;
+            _user = user;
         }
         public async Task<User> RegisterUserAsync(string username, string password, string email, string role)
         {
+            if (string.IsNullOrEmpty(username)) throw new ArgumentException("Username required");
+            if (string.IsNullOrEmpty(password)) throw new ArgumentException("Password required");
+            if (string.IsNullOrEmpty(email)) throw new ArgumentException("Email required");
+
             var user = new User
             {
                 Username = username,
@@ -24,9 +28,7 @@ namespace MinimalEshop.Application.Service
                 Email = email,
                 Role = role
             };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
+            return await _user.RegisterAsync(user);
         }
     }
 

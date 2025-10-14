@@ -1,57 +1,39 @@
-﻿using MinimalEshop.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
+using System.Linq;
 
 namespace MinimalEshop.Application.Service
 {
-    public class ProductService: IProduct
+    public class ProductService
     {
-        private readonly EshopDbcontect _context;
+        private readonly IProduct _product;
 
-        public ProductService(EshopDbcontect context)
+        public ProductService(IProduct product)
         {
-            _context = context;
+            _product = product;
         }
 
         public async Task<List<Product>> GetProductAsync()
         {
-            var query = await _context.Products.AsQueryable();
-            return query.ToListAsync();
+            return await _product.GetAllAsync();
+            
         }
 
         public async Task<Product> CreateProductAsync(Product product)
         {
-            _context.Product.Add(product);
-            await _context.SaveChangesAsync();
-            return product;
+             return await _product.AddAsync(product);
+            
         }
 
-        public async Task<bool> UpdateProductAsync(int ProductId)
+        public async Task<bool> UpdateProductAsync(Product product)
         {
-            var product = await _context.Product.FindAsync(ProductId);
-            if (product == null)
-            {
-                return false;
-            }
-            _context.Product.Update(product);
-            await _context.SaveChangesAsync();
-            return true;
+            
+            return await _product.UpdateAsync(product);
         }
 
-        public async Task<bool> DeleteProductAsync(int ProductId)
+        public async Task<bool> DeleteProductAsync(string ProductId)
         {
-            var product = await _context.Product.FindAsync(ProductId);
-            if (product == null)
-            {
-                return false;
-            }
-            _context.Product.Remove(product);
-            await _context.SaveChangesAsync();
-            return true;
+            return await _product.DeleteAsync(ProductId);
         }
     }
 }

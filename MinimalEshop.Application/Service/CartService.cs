@@ -1,22 +1,17 @@
-﻿using MinimalEshop.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service
 {
-    public class CartService : ICart
+    public class CartService 
     {
-        private readonly EshopDbcontext _context;
+        private readonly ICart _cart;
 
-        public AddToCartService(EshopDbcontext context)
+        public CartService(ICart cart)
         {
-            _context = context;
+            _cart = cart;
         }
-        public async Task<Cart> AddToCartAsync(int productId, int quantity, int userId)
+        public async Task<bool> AddToCartAsync(string productId, int quantity, int userId)
         {
             var cart = new Cart
             {
@@ -25,9 +20,12 @@ namespace MinimalEshop.Application.Service
                 UserId = userId
             };
 
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync();
-            return cart;
+            return await _cart.AddToCartAsync(productId, quantity, userId);
         }
+
+        //public Task<AddToBasketResponseDto> AddToCartAsync(AddToCartRequestDto addToCartRequestDto)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
