@@ -16,12 +16,30 @@ namespace MinimalEshop.Presentation.RouteGroup
                     CartId = cartDto.CartId,
                     ProductId = cartDto.ProductId,
                     Quantity = cartDto.Quantity,
-                    UserId = cartDto.UserId
+                    UserId = cartDto.UserId                 
                 };
 
                 var created = await _service.AddToCartAsync(cartDto.ProductId, cartDto.Quantity, cartDto.UserId);
 
                 return Results.Ok(created);
+            });
+
+
+            group.MapDelete("/delete", async ([FromServices] CartService _service, string ProductId) =>
+            {
+                    var deleted = await _service.DeleteProductFromCartAsync(ProductId);
+                    return Results.Ok(deleted);
+            });
+
+
+            group.MapGet("/getcart", async ([FromServices] CartService _service, [FromQuery] string userId) =>
+            {
+                var cart = await _service.GetCartByUserIdAsync(userId);
+                if (cart == null)
+                {
+                    return Results.NotFound("Cart not found for the specified user.");
+                }
+                return Results.Ok(cart);
             });
 
             return group;

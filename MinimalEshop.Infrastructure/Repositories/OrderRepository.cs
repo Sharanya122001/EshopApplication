@@ -24,7 +24,7 @@ namespace MinimalEshop.Infrastructure.Repositories
             _order = context.Orders;
             _orderItem = context.OrderItems;
         }
-        public async Task<bool> CheckOutAsync(int userId)
+        public async Task<bool> CheckOutAsync(string userId)
         {
 
             var cartList = await _order.Find(c => c.UserId == userId).ToListAsync();

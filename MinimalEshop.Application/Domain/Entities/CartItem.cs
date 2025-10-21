@@ -1,13 +1,10 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace MinimalEshop.Application.Domain.Entities
+public class CartItem
 {
-    public class CartItem
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string ProductId { get; set; }
-        public int Quantity { get; set; }
-    }
+    [BsonElement("ProductId")]
+    public string ProductId { get; set; }
+
+    [BsonElement("Quantity")]
+    public int Quantity { get; set; }
 }

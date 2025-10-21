@@ -11,7 +11,7 @@ namespace MinimalEshop.Application.Interface
 {
     public interface IOrder
     {
-        Task<bool> CheckOutAsync(int UserId);
+        Task<bool> CheckOutAsync(string UserId);
         Task<PaymentStatus> ProcessPaymentAsync(int OrderId);
         Task<OrderItem> CheckOrderDetailsAsync(int OrderId);
     }

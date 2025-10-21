@@ -18,7 +18,7 @@ namespace MinimalEshop.Application.Service
             _context = context;
         }
 
-        public async Task<bool> CheckOutAsync(int UserId)
+        public async Task<bool> CheckOutAsync(string UserId)
         {
             var result = await _context.CheckOutAsync(UserId);
             return true;

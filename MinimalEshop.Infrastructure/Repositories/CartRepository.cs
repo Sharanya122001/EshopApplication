@@ -3,6 +3,7 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Infrastructure.Context;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace MinimalEshop.Infrastructure.Repositories
         {
             _carts = context.Carts; 
         }
-        public async Task<bool> AddToCartAsync(string ProductId, int quantity, int userId)
+        public async Task<bool> AddToCartAsync(string ProductId, int quantity, string userId)
         {
             var cartItem = new CartItem
             {
@@ -35,5 +36,15 @@ namespace MinimalEshop.Infrastructure.Repositories
             return true;
           
         }
+        public async Task<bool> DeleteAsync(string ProductId)
+        {
+            var result = await _carts.DeleteOneAsync(p => p.ProductId == ProductId);
+            return result.IsAcknowledged && result.DeletedCount > 0;
+        }
+        public async Task<Cart?> GetCartByUserIdAsync(string userId)
+{
+        return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
+}
+
     }
 }

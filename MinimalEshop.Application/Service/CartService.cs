@@ -3,7 +3,7 @@ using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service
 {
-    public class CartService 
+    public class CartService
     {
         private readonly ICart _cart;
 
@@ -11,7 +11,7 @@ namespace MinimalEshop.Application.Service
         {
             _cart = cart;
         }
-        public async Task<bool> AddToCartAsync(string productId, int quantity, int userId)
+        public async Task<bool> AddToCartAsync(string productId, int quantity, string userId)
         {
             var cart = new Cart
             {
@@ -22,10 +22,17 @@ namespace MinimalEshop.Application.Service
 
             return await _cart.AddToCartAsync(productId, quantity, userId);
         }
+        public async Task<Cart?> GetCartByUserIdAsync(string userId)
+        {
+            return await _cart.GetCartByUserIdAsync(userId);
+        }
+        public async Task<bool> DeleteProductFromCartAsync(string ProductId)
+        {
+            return await _cart.DeleteAsync(ProductId);
+        }
 
-        //public Task<AddToBasketResponseDto> AddToCartAsync(AddToCartRequestDto addToCartRequestDto)
-        //{
-        //    throw new NotImplementedException();
-        //}
+
+
+
     }
 }
