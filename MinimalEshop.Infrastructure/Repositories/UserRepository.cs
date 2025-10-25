@@ -25,5 +25,25 @@ namespace MinimalEshop.Infrastructure.Repositories
             return user;
         }
 
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        }
+        public async Task<User?> LoginAsync(string username, string password)
+        {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                return null;
+
+            var user = await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+
+            if (user == null)
+                return null;
+            if (user.Password != password)
+                return null;
+
+            return user;
+        }
+
+
     }
 }

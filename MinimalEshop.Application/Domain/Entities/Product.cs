@@ -17,6 +17,6 @@ namespace MinimalEshop.Application.Domain.Entities
         [BsonElement("Addedon")]
         public DateTime Addedon { get; set; }
         [BsonElement("CategoryId")]
-        public int CategoryId { get; set; }
+        public string CategoryId { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task GetProductAsync_ReturnsListOfProducts()
         {
-            var products = new List<Product>//arranging the mock data
+            var products = new List<Product>
             {
                 new Product { ProductId = "1", Name = "Product1" },
                 new Product { ProductId = "2", Name = "Product2" }
@@ -26,13 +26,49 @@ namespace MinimalEshop.Application.Test.Services
             _productRepositoryMock.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(products);
 
-            var result = await _productService.GetProductAsync();//this is Actual
+            var result = await _productService.GetProductAsync();
 
             Assert.Equal(2, result.Count);
             Assert.Equal(products[0].ProductId, result[0].ProductId);
             Assert.Equal(products[1].Name, result[1].Name);
 
         }
+       
+        [Fact]
+        public async Task SearchProductsAsync_ReturnsMatchingProducts()
+        {
+            var keyword = "Laptop";
+            var products = new List<Product>
+            {
+                 new Product { ProductId = "1", Name = "Gaming Laptop", Price = 1000 },
+                 new Product { ProductId = "2", Name = "Business Laptop", Price = 900 }
+            };
+
+            _productRepositoryMock
+                .Setup(repo => repo.SearchAsync(keyword))
+                .ReturnsAsync(products);
+
+            var result = await _productService.SearchProductsAsync(keyword);
+
+            Assert.Equal(2, result.Count);
+            Assert.Contains(result, p => p.Name.Contains("Laptop"));
+            _productRepositoryMock.Verify(repo => repo.SearchAsync(keyword), Times.Once);
+        }
+
+        [Fact]
+        public async Task SearchProductsAsync_ReturnsEmptyList_WhenKeywordIsEmpty()
+        {
+            var keyword = "";
+            _productRepositoryMock
+                .Setup(repo => repo.SearchAsync(keyword))
+                .ReturnsAsync(new List<Product>());
+
+            var result = await _productService.SearchProductsAsync(keyword);
+
+            Assert.Empty(result);
+            _productRepositoryMock.Verify(repo => repo.SearchAsync(keyword), Times.Once);
+        }
+
 
         [Fact]
         public async Task CreateProductAsync_ReturnsCreatedProduct()

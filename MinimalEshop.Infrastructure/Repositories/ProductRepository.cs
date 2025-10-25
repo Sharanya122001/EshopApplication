@@ -23,6 +23,23 @@ namespace MinimalEshop.Infrastructure.Repositories
             return await _products.Find(_ => true).ToListAsync();
         }
 
+        public async Task<List<Product>> SearchAsync(string keyword)
+            {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return new List<Product>();
+
+            var filter = Builders<Product>.Filter.Regex(
+                p => p.Name,
+                new MongoDB.Bson.BsonRegularExpression(keyword, "i"));
+            return await _products.Find(filter).ToListAsync();
+            }
+
+        //public async Task<List<Product>> GetByCategoryAsync(string categoryId)
+        //    {
+        //    var filter = Builders<Product>.Filter.Eq("CategoryId", categoryId);
+        //    return await _products.Find(filter).ToListAsync();
+        //    }
+
         public async Task<Product> AddAsync(Product product)
         {
             await _products.InsertOneAsync(product);

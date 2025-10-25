@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "MinimalEshop.Domain\\MinimalEshop.Domain.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "MinimalEshop.Application\\MinimalEshop.Application.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "MinimalEshop.Infrastructure\\MinimalEshop.Infrastructure.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "MinimalEshop.Application.Test\\MinimalEshop.Application.Test.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "MinimalEshop.Presentation\\MinimalEshop.Presentation.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
