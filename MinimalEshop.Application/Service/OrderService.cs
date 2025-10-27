@@ -24,12 +24,12 @@ namespace MinimalEshop.Application.Service
             return true;
         }
 
-        public async Task<PaymentStatus> ProcessPaymentAsync(int OrderId)
+        public async Task<PaymentStatus> ProcessPaymentAsync(string OrderId)
         {
             return await _context.ProcessPaymentAsync(OrderId);
         }
 
-        public async Task<OrderItem> CheckOrderDetailsAsync(int OrderId)
+        public async Task<OrderItem> CheckOrderDetailsAsync(string OrderId)
         {
             return await _context.CheckOrderDetailsAsync(OrderId);
 

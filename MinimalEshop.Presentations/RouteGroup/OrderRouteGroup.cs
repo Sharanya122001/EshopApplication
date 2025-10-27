@@ -15,16 +15,16 @@ namespace MinimalEshop.Presentation.RouteGroup
             group.MapPost("/checkout", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
             {
                 var order = new Order
-                {
+                    {
                     UserId = orderDto.UserId,
                     //OrderDate = orderDto.OrderDate,
                     TotalAmount = orderDto.TotalAmount,
                     Status = orderDto.Status
-                };
+                    };
 
                 var checkout = await _service.CheckOutAsync(orderDto.UserId);
                 return Results.Ok(checkout);
-            });
+            }).RequireAuthorization("UserOrAdmin");
 
             group.MapPost("/payment", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
             {
@@ -39,9 +39,9 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var paymentStatus = await _service.ProcessPaymentAsync(orderDto.OrderId);
                 return Results.Ok(paymentStatus);
-            });
+            }).RequireAuthorization("UserOrAdmin");
 
-            group.MapGet("/details", async ([FromServices] OrderService _service, [FromQuery] int orderId/*[FromBody] OrderDto orderDto*/) =>
+            group.MapGet("/details", async ([FromServices] OrderService _service, [FromQuery] string orderId) =>
             {
                 //var order = new Order
                 //{
@@ -54,7 +54,7 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var orderDetails = await _service.CheckOrderDetailsAsync(orderId);
                 return Results.Ok(orderDetails);
-            });
+            }).RequireAuthorization("UserOrAdmin");
 
             return group;
         }

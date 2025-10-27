@@ -8,8 +8,8 @@ namespace MinimalEshop.Application.Domain.Entities
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int OrderItemId { get; set; }
-        public int OrderId { get; set; }
+        public string OrderItemId { get; set; }
+        public string OrderId { get; set; }
         public object ProductId { get; set; }
         public object Quantity { get; set; }
         public object Price { get; set; }

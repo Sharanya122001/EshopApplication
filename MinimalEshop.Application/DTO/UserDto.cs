@@ -16,7 +16,7 @@ namespace MinimalEshop.Application.DTO
     }
 
     public class UserResponseDto : UserDto
-        {
+    {
         public string Role { get; set; }
-        }
+    }
 }

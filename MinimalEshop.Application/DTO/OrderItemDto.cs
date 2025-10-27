@@ -8,7 +8,7 @@ namespace MinimalEshop.Application.DTO
 {
     public class OrderItemDto
     {
-        public int OrderItemId { get; set; }
-        public int OrderId { get; set; }
+        public string OrderItemId { get; set; }
+        public string OrderId { get; set; }
     }
 }

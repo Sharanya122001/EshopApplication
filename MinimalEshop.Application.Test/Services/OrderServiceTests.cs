@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace MinimalEshop.Application.Test.Services
 {
-    public class OrderServiceTeste
+    public class OrderServiceTests
     {
         private readonly OrderService _orderService;
         private readonly Mock<IOrder> _orderRepositoryMock;
 
-        public OrderServiceTeste()
+        public OrderServiceTests()
         {
             _orderRepositoryMock = new Mock<IOrder>();
             _orderService = new OrderService(_orderRepositoryMock.Object);
@@ -33,7 +33,7 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task ProcessPaymentAsync_ReturnPaymentStatus()
         {
-            int orderId = 101;
+            string orderId = "sjdhfhdfgjhdg101";
             var paymentStatus = PaymentStatus.Success;
 
             _orderRepositoryMock.Setup(r => r.ProcessPaymentAsync(orderId)).ReturnsAsync(paymentStatus);
@@ -45,7 +45,7 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task CheckOrderDetailsAsync_ReturnCheckOrderDetails()
         {
-            int orderId = 101;
+            string orderId = "sjdhfhdksjhdg101";
             var orderItem = new OrderItem
             {
                 OrderId = orderId,

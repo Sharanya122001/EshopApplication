@@ -30,9 +30,5 @@ namespace MinimalEshop.Application.Service
         {
             return await _cart.DeleteAsync(ProductId);
         }
-
-
-
-
     }
 }

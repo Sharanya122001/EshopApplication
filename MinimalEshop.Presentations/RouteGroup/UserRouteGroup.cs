@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
+using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -25,16 +27,21 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return registered;
             });
 
-            group.MapPost("/Login", async ([FromServices] UserService _service, [FromBody] LoginDto loginDto) =>
+            group.MapPost("/Login", async ([FromServices] UserService _service,[FromBody] LoginDto loginDto) =>
             {
+                if (loginDto == null)
+                    return Results.BadRequest("Invalid request body.");
+
                 var token = await _service.LoginAsync(loginDto.Username, loginDto.Password);
 
                 if (token == null)
                     return Results.Unauthorized();
 
                 return Results.Ok(new { Token = token });
+
             });
+
             return group;
-            }
+        }
     }
 }

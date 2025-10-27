@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
@@ -8,23 +9,21 @@ using System.Security.Claims;
 using System.Text;
 
 namespace MinimalEshop.Application.Service
-    {
+{
     public class TokenService : ITokenService
-        {
+    {
         private readonly JwtSettings _jwtSettings;
         private readonly byte[] _keyBytes;
-        public TokenService(IOptionsMonitor<JwtSettings> jwtSettings)
+        public TokenService(IConfiguration configuration)
             {
-            if (jwtSettings == null)
-                throw new ArgumentNullException(nameof(jwtSettings));
+            _jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
+                           ?? throw new ArgumentException("JWT configuration section is missing.");
 
-            _jwtSettings = jwtSettings.CurrentValue;
-
-            if (_jwtSettings == null || string.IsNullOrWhiteSpace(_jwtSettings.Key))
+            if (string.IsNullOrWhiteSpace(_jwtSettings.Key))
                 throw new ArgumentException("JWT Key is missing in configuration.");
 
             _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Key);
-            }
+        }
 
         public string GenerateToken(string username, string role)
             {
@@ -48,6 +47,6 @@ namespace MinimalEshop.Application.Service
             );
 
             return tokenHandler.WriteToken(token);
-            }
         }
     }
+}

@@ -26,8 +26,7 @@ namespace MinimalEshop.Application.Test.Services
             _productRepositoryMock.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(products);
 
-            var result = await _productService.GetProductAsync();
-
+            var result = await _productService.GetProductAsync(); 
             Assert.Equal(2, result.Count);
             Assert.Equal(products[0].ProductId, result[0].ProductId);
             Assert.Equal(products[1].Name, result[1].Name);

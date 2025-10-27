@@ -62,7 +62,7 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             return true;
         }
-        public async Task<PaymentStatus> ProcessPaymentAsync(int orderId)
+        public async Task<PaymentStatus> ProcessPaymentAsync(string orderId)
         { 
             var order = await _order.Find(o => o.OrderId == orderId).FirstOrDefaultAsync();
 
@@ -85,7 +85,7 @@ namespace MinimalEshop.Infrastructure.Repositories
             }
         }
 
-        public async Task<OrderItem> CheckOrderDetailsAsync(int orderId)
+        public async Task<OrderItem> CheckOrderDetailsAsync(string orderId)
         {
             var orderItem = await _orderItem
                 .Find(oi => oi.OrderId == orderId)

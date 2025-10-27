@@ -48,7 +48,7 @@ namespace Presentation
             builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<CategoryService>();
 
-            builder.Services.AddSingleton<ITokenService, TokenService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddAuthentication(options =>
             {
@@ -58,8 +58,8 @@ namespace Presentation
             .AddJwtBearer(options =>
             {
                 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
-                options.RequireHttpsMetadata = true;
-                options.SaveToken = true;
+                //options.RequireHttpsMetadata = true;
+                //options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                     {
                     ValidateIssuerSigningKey = true,
@@ -91,7 +91,7 @@ namespace Presentation
                     });
 
                 var jwtSecurityScheme = new OpenApiSecurityScheme
-                    {
+                {
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     Name = "Authorization",
@@ -99,17 +99,17 @@ namespace Presentation
                     Type = SecuritySchemeType.Http,
                     Description = "Enter 'Bearer' [space] and then your valid token.",
                     Reference = new OpenApiReference
-                        {
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                        Type = ReferenceType.SecurityScheme
-                        }
-                    };
+                    {
+                          Id = JwtBearerDefaults.AuthenticationScheme,
+                          Type = ReferenceType.SecurityScheme
+                    }
+                };
 
                 options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtSecurityScheme, Array.Empty<string>() }
-    });
+                {
+                   { jwtSecurityScheme, Array.Empty<string>() }
+                });
             });
 
             var app = builder.Build();
@@ -121,8 +121,55 @@ namespace Presentation
                 }
 
             app.UseHttpsRedirection();
+            app.Use(async (context, next) =>
+            {
+                await next();
+
+                if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
+                    {
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"message\": \"You are not authorized to access this resource.\"}");
+                    }
+                else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                    {
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"message\": \"Authentication is required.\"}");
+                    }
+            });
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            //app.Use(async (context, next) =>
+            //{
+            //    await next();
+
+            //    if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
+            //        {
+            //        if (!context.Response.HasStarted)
+            //            {
+            //            context.Response.ContentType = "application/json";
+            //            await context.Response.WriteAsJsonAsync(new
+            //                {
+            //                status = 403,
+            //                message = "You are not authorized to perform this action."
+            //                });
+            //            }
+            //        }
+            //    else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            //        {
+            //        if (!context.Response.HasStarted)
+            //            {
+            //            context.Response.ContentType = "application/json";
+            //            await context.Response.WriteAsJsonAsync(new
+            //                {
+            //                status = 401,
+            //                message = "Authentication required. Please log in."
+            //                });
+            //            }
+            //        }
+            //});
+
 
             app.MapGroup("/cart").CartAPI();
             app.MapGroup("/products").ProductAPI();
