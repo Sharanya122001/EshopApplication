@@ -12,23 +12,28 @@ namespace MinimalEshop.Application.Service
             _cart = cart;
         }
         public async Task<bool> AddToCartAsync(string productId, int quantity, string userId)
-        {
-            var cart = new Cart
+            {
+            var cartItem = new CartItem
             {
                 ProductId = productId,
-                Quantity = 1,
-                UserId = userId
+                Quantity = quantity
             };
 
-            return await _cart.AddToCartAsync(productId, quantity, userId);
+            var cart = new Cart
+            {
+                UserId = userId,
+                Products = new List<CartItem> { cartItem }
+            };
+
+            return await _cart.AddToCartAsync(cart);
         }
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
         {
             return await _cart.GetCartByUserIdAsync(userId);
         }
-        public async Task<bool> DeleteProductFromCartAsync(string ProductId)
+        public async Task<bool> DeleteProductFromCartAsync(string userId, string productId)
         {
-            return await _cart.DeleteAsync(ProductId);
+            return await _cart.DeleteAsync(userId, productId);
         }
     }
 }

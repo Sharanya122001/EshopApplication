@@ -2,11 +2,6 @@
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MinimalEshop.Application.Test.Services
 {
@@ -22,45 +17,91 @@ namespace MinimalEshop.Application.Test.Services
         }
 
         [Fact]
-        public async Task AddToCartAsync_ReturnsCartAdded()
-        {
-            var productId = "prod123";
+        public async Task AddToCartAsync_ShouldReturnTrue_WhenCartIsAdded()
+            {
+            var productId = "P123";
+            var userId = "U001";
             var quantity = 2;
-            var userId = "user123";
 
-            _cartRepositoryMock.Setup(r => r.AddToCartAsync(productId, quantity, userId))
-                         .ReturnsAsync(true);
+            _cartRepositoryMock.Setup(c => c.AddToCartAsync(It.IsAny<Cart>())).ReturnsAsync(true);
+
             var result = await _cartService.AddToCartAsync(productId, quantity, userId);
             Assert.True(result);
-        }
+            _cartRepositoryMock.Verify(c => c.AddToCartAsync(It.Is<Cart>(
+                cart => cart.UserId == userId &&
+                        cart.Products.Count == 1 &&
+                        cart.Products[0].ProductId == productId &&
+                        cart.Products[0].Quantity == quantity
+            )), Times.Once);
+            }
+
+        [Fact]
+        public async Task AddToCartAsync_ShouldReturnFalse_WhenAddFails()
+            {
+
+            var productId = "P999";
+            var userId = "U002";
+            var quantity = 1;
+
+            _cartRepositoryMock.Setup(c => c.AddToCartAsync(It.IsAny<Cart>())).ReturnsAsync(false);
+
+            var result = await _cartService.AddToCartAsync(productId, quantity, userId);
+
+            Assert.False(result);
+            }
+
         [Fact]
         public async Task GetCartByUserIdAsync_Should_Return_Cart()
-        {
+            {
             var userId = "user123";
             var cart = new Cart
-            {
-                ProductId = "prod123",
-                Quantity = 1,
-                UserId = userId
-            };
+                {
+                UserId = userId,
+                Products = new List<CartItem>
+                {
+                    new CartItem { ProductId = "prod123", Quantity = 1 }
+                }
+                };
 
             _cartRepositoryMock.Setup(r => r.GetCartByUserIdAsync(userId)).ReturnsAsync(cart);
 
+
             var result = await _cartService.GetCartByUserIdAsync(userId);
+
+
             Assert.NotNull(result);
             Assert.Equal(userId, result.UserId);
-            Assert.Equal("prod123", result.ProductId);
-            Assert.Equal(1, result.Quantity);
-
-        }
+            Assert.Single(result.Products);
+            Assert.Equal("prod123", result.Products[0].ProductId);
+            Assert.Equal(1, result.Products[0].Quantity);
+            }
 
         [Fact]
-        public async Task DeleteProductFromCartAsync_Should_Call_DeleteAsync_Once_And_Return_True()
-        {
-            var productId = "prod123";
-            _cartRepositoryMock.Setup(r => r.DeleteAsync(productId)).ReturnsAsync(true);
-            var result = await _cartService.DeleteProductFromCartAsync(productId);
+        public async Task DeleteProductFromCartAsync_ShouldReturnTrue_WhenProductDeleted()
+            {
+
+            var userId = "U001";
+            var productId = "P123";
+            _cartRepositoryMock.Setup(c => c.DeleteAsync(userId, productId)).ReturnsAsync(true);
+
+            var result = await _cartService.DeleteProductFromCartAsync(userId, productId);
+
             Assert.True(result);
+            _cartRepositoryMock.Verify(c => c.DeleteAsync(userId, productId), Times.Once);
+            }
+
+        [Fact]
+        public async Task DeleteProductFromCartAsync_ShouldReturnFalse_WhenDeleteFails()
+            {
+
+            var userId = "U001";
+            var productId = "P999";
+            _cartRepositoryMock.Setup(c => c.DeleteAsync(userId, productId)).ReturnsAsync(false);
+
+
+            var result = await _cartService.DeleteProductFromCartAsync(userId, productId);
+
+            Assert.False(result);
+            }
         }
-    }
 }

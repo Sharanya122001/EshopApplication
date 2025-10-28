@@ -15,23 +15,37 @@ namespace MinimalEshop.Presentation.RouteGroup
             group.MapPost("/add", async ([FromServices] CartService _service, [FromBody] CartDto cartDto) =>
             {
                 var cart = new Cart
-                {
-                    CartId = cartDto.CartId,
-                    ProductId = cartDto.ProductId,
-                    Quantity = cartDto.Quantity,
-                    UserId = cartDto.UserId                 
+                { 
+                    UserId = cartDto.UserId,
+                    Products = new List<CartItem>
+                    {
+                        new CartItem
+                        {
+                            ProductId = cartDto.ProductId,
+                            Quantity = cartDto.Quantity
+                        }
+                    }
                 };
 
-                var created = await _service.AddToCartAsync(cartDto.ProductId, cartDto.Quantity, cartDto.UserId);
-
-                return Results.Ok(created);
+                var created = await _service.AddToCartAsync(
+                   cartDto.ProductId,
+                   cartDto.Quantity,
+                   cartDto.UserId
+                );
+                return created
+                    ? Results.Ok(new { message = "Product added to cart successfully." })
+                    : Results.BadRequest(new { message = "Failed to add product to cart." });
+            
             }).RequireAuthorization("UserOrAdmin");
 
 
-            group.MapDelete("/delete", async ([FromServices] CartService _service, string ProductId) =>
+
+            group.MapDelete("/delete", async ([FromServices] CartService _service, [FromQuery] string userId, [FromQuery] string productId) =>
             {
-                    var deleted = await _service.DeleteProductFromCartAsync(ProductId);
-                    return Results.Ok(deleted);
+                var deleted = await _service.DeleteProductFromCartAsync(userId, productId);
+                return deleted
+                    ? Results.Ok(new { message = "Product removed from cart." })
+                    : Results.NotFound(new { message = "Product not found in cart." });
             }).RequireAuthorization("UserOrAdmin");
 
 

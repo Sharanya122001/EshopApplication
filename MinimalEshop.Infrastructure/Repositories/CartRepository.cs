@@ -21,26 +21,39 @@ namespace MinimalEshop.Infrastructure.Repositories
         {
             _carts = context.Carts; 
         }
-        public async Task<bool> AddToCartAsync(string ProductId, int quantity, string userId)
+        public async Task<bool> AddToCartAsync(Cart cart)
         {
-            var cartItem = new CartItem
-            {
-                ProductId = ProductId,
-                Quantity = quantity
-            };
+            if (cart == null || string.IsNullOrEmpty(cart.UserId) || cart.Products == null || !cart.Products.Any())
+                return false;
 
-            await _carts.UpdateOneAsync(
-          c => c.UserId == userId,
-          Builders<Cart>.Update.Push(c => c.Products, cartItem), 
-          new UpdateOptions { IsUpsert = true });
+            var cartItem = cart.Products.First();
+            var update = Builders<Cart>.Update.Push(c => c.Products, cartItem);
+
+            await _carts.UpdateOneAsync
+            (
+                c => c.UserId == cart.UserId,
+                update,
+                new UpdateOptions { IsUpsert = true }
+            );
+
             return true;
-          
         }
-        public async Task<bool> DeleteAsync(string ProductId)
+
+        public async Task<bool> DeleteAsync(string userId, string productId)
         {
-            var result = await _carts.DeleteOneAsync(p => p.ProductId == ProductId);
-            return result.IsAcknowledged && result.DeletedCount > 0;
+            var update = Builders<Cart>.Update.PullFilter(
+                c => c.Products,
+                p => p.ProductId == productId
+            );
+
+            var result = await _carts.UpdateOneAsync(
+                c => c.UserId == userId,
+                update
+            );
+
+            return result.IsAcknowledged && result.ModifiedCount > 0;
         }
+
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
 {
         return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();

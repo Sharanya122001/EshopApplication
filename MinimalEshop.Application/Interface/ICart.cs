@@ -10,8 +10,8 @@ namespace MinimalEshop.Application.Interface
 {
     public interface ICart
     {
-        Task<bool> AddToCartAsync(string ProductId, int quantity, string userId);
-        Task<bool> DeleteAsync(string productId);
+        Task<bool> AddToCartAsync(Cart cart);
+        Task<bool> DeleteAsync(string userId, string productId);
         Task<Cart?> GetCartByUserIdAsync(string userId);
     }
 }
