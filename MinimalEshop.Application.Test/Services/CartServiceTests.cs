@@ -16,39 +16,48 @@ namespace MinimalEshop.Application.Test.Services
             _cartService = new CartService(_cartRepositoryMock.Object);
         }
 
+        
         [Fact]
-        public async Task AddToCartAsync_ShouldReturnTrue_WhenCartIsAdded()
-            {
-            var productId = "P123";
-            var userId = "U001";
+        public async Task AddToCartAsync_Should_CallRepositoryWithCorrectData_AndReturnTrue()
+        {
+
+            var mockRepo = new Mock<ICart>();
+            var cartService = new CartService(mockRepo.Object);
+
+            var productId = "p123";
             var quantity = 2;
+            var userId = "u456";
 
-            _cartRepositoryMock.Setup(c => c.AddToCartAsync(It.IsAny<Cart>())).ReturnsAsync(true);
+            mockRepo
+                .Setup(r => r.AddToCartAsync(It.IsAny<Cart>()))
+                .ReturnsAsync(true);
 
-            var result = await _cartService.AddToCartAsync(productId, quantity, userId);
+            var result = await cartService.AddToCartAsync(productId, quantity, userId);
+
             Assert.True(result);
-            _cartRepositoryMock.Verify(c => c.AddToCartAsync(It.Is<Cart>(
-                cart => cart.UserId == userId &&
-                        cart.Products.Count == 1 &&
-                        cart.Products[0].ProductId == productId &&
-                        cart.Products[0].Quantity == quantity
+
+            mockRepo.Verify(r => r.AddToCartAsync(It.Is<Cart>(c =>
+                c.UserId == userId &&
+                c.Products.Count == 1 &&
+                c.Products[0].ProductId == productId &&
+                c.Products[0].Quantity == quantity
             )), Times.Once);
-            }
+        }
 
         [Fact]
-        public async Task AddToCartAsync_ShouldReturnFalse_WhenAddFails()
+        public async Task AddToCartAsync_Should_ReturnFalse_WhenRepositoryReturnsFalse()
             {
 
-            var productId = "P999";
-            var userId = "U002";
-            var quantity = 1;
+            var mockRepo = new Mock<ICart>();
+            var cartService = new CartService(mockRepo.Object);
 
-            _cartRepositoryMock.Setup(c => c.AddToCartAsync(It.IsAny<Cart>())).ReturnsAsync(false);
+            mockRepo
+                .Setup(r => r.AddToCartAsync(It.IsAny<Cart>()))
+                .ReturnsAsync(false);
 
-            var result = await _cartService.AddToCartAsync(productId, quantity, userId);
-
+            var result = await cartService.AddToCartAsync("p1", 1, "u1");
             Assert.False(result);
-            }
+        }
 
         [Fact]
         public async Task GetCartByUserIdAsync_Should_Return_Cart()

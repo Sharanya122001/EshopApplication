@@ -39,6 +39,7 @@ namespace MinimalEshop.Infrastructure.Repositories
             return true;
         }
 
+
         public async Task<bool> DeleteAsync(string userId, string productId)
         {
             var update = Builders<Cart>.Update.PullFilter(
@@ -55,9 +56,9 @@ namespace MinimalEshop.Infrastructure.Repositories
         }
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
-{
-        return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
-}
+        {
+            return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
+        }
 
     }
 }
