@@ -27,7 +27,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                     message,
                     data
                 });
-            });
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Order");
 
 
             group.MapPost("/paymentprocess", async (ClaimsPrincipal user,[FromBody] PaymentRequest request,OrderService orderService) =>
@@ -43,7 +44,9 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(new { message });
 
                 return Results.Ok(new { message });
-            });
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Order");
+
             return group;
         }
 

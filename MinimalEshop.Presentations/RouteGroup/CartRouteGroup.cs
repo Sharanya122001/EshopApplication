@@ -45,7 +45,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                     ? Results.Ok(new { message = "Product added to cart successfully." })
                     : Results.BadRequest(new { message = "Failed to add product to cart." });
 
-            }).RequireAuthorization("UserOrAdmin");
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Cart");
 
 
             group.MapDelete("/delete", async ([FromServices] CartService _service, [FromQuery] string userId, [FromQuery] string productId) =>
@@ -54,7 +55,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return deleted
                     ? Results.Ok(new { message = "Product removed from cart." })
                     : Results.NotFound(new { message = "Product not found in cart." });
-            }).RequireAuthorization("UserOrAdmin");
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Cart");
 
 
             group.MapGet("/getcart", async (HttpContext context, [FromServices] CartService _service) =>
@@ -76,7 +78,8 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 return Results.Ok(cart);
 
-            }).RequireAuthorization("UserOrAdmin");
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Cart");
             return group;
         }
 

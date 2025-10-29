@@ -17,7 +17,8 @@ namespace MinimalEshop.Presentation.RouteGroup
             {
                 var product = await _service.GetProductAsync();
                 return product;
-            }).RequireAuthorization("UserOrAdmin");
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Product");
 
             group.MapGet("/products/search", async ([FromServices] ProductService _service, [FromQuery] string query) =>
             {
@@ -26,7 +27,8 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var results = await _service.SearchProductsAsync(query);
                 return Results.Ok(results);
-            }).RequireAuthorization("UserOrAdmin");
+            }).RequireAuthorization("UserOrAdmin")
+            .WithTags("Product");
 
             group.MapPost("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto) =>
             {
@@ -40,7 +42,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                 };
                 var created = await _service.CreateProductAsync(product);
                 return created;
-            }).RequireAuthorization("AdminOnly");
+            }).RequireAuthorization("AdminOnly")
+            .WithTags("Product");
 
             group.MapPut("/update", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto) =>
             {
@@ -56,14 +59,15 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var updated = await _service.UpdateProductAsync(product);
                 return Results.Ok(updated);
-            }).RequireAuthorization("AdminOnly");
+            }).RequireAuthorization("AdminOnly")
+            .WithTags("Product");
 
             group.MapDelete("/delete", async ([FromServices] ProductService _service, [FromQuery] string ProductId) =>
             {
                 var deleted = await _service.DeleteProductAsync(ProductId);
                 return Results.Ok(deleted);
-            }).RequireAuthorization("AdminOnly");
-
+            }).RequireAuthorization("AdminOnly")
+            .WithTags("Product");
 
             return group;
         }
