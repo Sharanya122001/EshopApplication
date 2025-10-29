@@ -25,6 +25,8 @@ namespace MinimalEshop.Application.Service
         {
             return await _context.ProcessPaymentAsync(userId, paymentMethod);
         }
+        public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
+    => await _context.GetOrderDetailsAsync(userId);
 
-        }
+    }
 }

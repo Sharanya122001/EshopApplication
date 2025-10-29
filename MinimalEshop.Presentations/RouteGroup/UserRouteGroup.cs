@@ -16,16 +16,15 @@ namespace MinimalEshop.Presentation.RouteGroup
             group.MapPost("/Register", async ([FromServices] UserService _service, [FromBody] UserDto userDto) =>
             {
                 var user = new User
-                    {
+                {
                     Username = userDto.Username,
                     Password = userDto.Password,
                     Email = userDto.Email,
                     Role = userDto.Role
-
-                    };
+                };
                 var registered = await _service.RegisterUserAsync(user.Username, user.Password, user.Email, user.Role);
                 return registered;
-            }).RequireAuthorization("UserOrAdmin")
+            })
             .WithTags("User");
 
             group.MapPost("/Login", async ([FromServices] UserService _service,[FromBody] LoginDto loginDto) =>
@@ -40,7 +39,7 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 return Results.Ok(new { Token = token });
 
-            }).RequireAuthorization("UserOrAdmin")
+            })
             .WithTags("User");
 
             return group;

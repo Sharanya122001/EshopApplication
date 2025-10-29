@@ -47,6 +47,23 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
+            group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService) =>
+            {
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                    return Results.Unauthorized();
+
+                var (success, message, data) = await orderService.GetOrderDetailsAsync(userId);
+
+                if (!success)
+                    return Results.BadRequest(new { message });
+
+                return Results.Ok(new { message, data });
+            })
+.RequireAuthorization("UserOrAdmin")
+.WithTags("Order");
+
             return group;
         }
 

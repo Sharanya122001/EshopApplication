@@ -114,8 +114,42 @@ namespace MinimalEshop.Infrastructure.Repositories
             return (true, message);
         }
 
+        public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
+            {
+            var order = await _order
+                .Find(o => o.UserId == userId)
+                .SortByDescending(o => o.OrderDate)
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                return (false, "No orders found for this user.", null);
+
+            var orderItems = await _orderItem
+                .Find(oi => oi.OrderId == order.OrderId)
+                .ToListAsync();
+
+            var responseData = new
+                {
+                order.OrderId,
+                order.UserId,
+                order.OrderDate,
+                order.TotalAmount,
+                order.Status,
+                PaymentMethod = order.PaymentMethod.ToString(),
+                PaymentStatus = order.PaymentStatus.ToString(),
+                Items = orderItems.Select(i => new
+                    {
+                    i.ProductId,
+                    i.Quantity,
+                    i.Price
+                    })
+                };
+
+            return (true, "Order details fetched successfully.", responseData);
+            }
+
+
+        }
 
     }
-
-}
 

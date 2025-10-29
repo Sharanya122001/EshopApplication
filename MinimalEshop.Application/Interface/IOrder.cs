@@ -13,6 +13,8 @@ namespace MinimalEshop.Application.Interface
     {
         Task<(bool success, string message, object data)> CheckOutAsync(string userId);
         Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod);
+        Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId);
 
+
+        }
     }
-}
