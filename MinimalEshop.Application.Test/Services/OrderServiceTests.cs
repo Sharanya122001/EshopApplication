@@ -1,71 +1,58 @@
-﻿using MinimalEshop.Application.Domain.Entities;
-using MinimalEshop.Application.Domain.Enums;
-using MinimalEshop.Application.Interface;
-using MinimalEshop.Application.Service;
+﻿using Xunit;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using MinimalEshop.Application.Service;
+using MinimalEshop.Application.Interface;
+using MinimalEshop.Application.Domain.Enums;
 
-namespace MinimalEshop.Application.Test.Services
-{
-    public class OrderServiceTests
+namespace MinimalEshop.Tests.Service
     {
+    public class OrderServiceTests
+        {
+        private readonly Mock<IOrder> _mockOrderRepo;
         private readonly OrderService _orderService;
-        private readonly Mock<IOrder> _orderRepositoryMock;
 
         public OrderServiceTests()
-        {
-            _orderRepositoryMock = new Mock<IOrder>();
-            _orderService = new OrderService(_orderRepositoryMock.Object);
-        }
-        [Fact]
-        public async Task CheckOutAsync_ReturnCheckOut()
-        {
-             var userId = "user123";
-            _orderRepositoryMock.Setup(r => r.CheckOutAsync(userId)).ReturnsAsync(true);
-            var result = await _orderService.CheckOutAsync(userId);
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task ProcessPaymentAsync_ReturnPaymentStatus()
-        {
-            string orderId = "sjdhfhdfgjhdg101";
-            var paymentStatus = PaymentStatus.Success;
-
-            _orderRepositoryMock.Setup(r => r.ProcessPaymentAsync(orderId)).ReturnsAsync(paymentStatus);
-
-            var result = await _orderService.ProcessPaymentAsync(orderId);
-            Assert.Equal(paymentStatus, result);
-        }
-
-        [Fact]
-        public async Task CheckOrderDetailsAsync_ReturnCheckOrderDetails()
-        {
-            string orderId = "sjdhfhdksjhdg101";
-            var orderItem = new OrderItem
             {
-                OrderId = orderId,
-                ProductId = "prod123",
-                Quantity = 2
-            };
+            _mockOrderRepo = new Mock<IOrder>();
+            _orderService = new OrderService(_mockOrderRepo.Object);
+            }
 
-            _orderRepositoryMock.Setup(r => r.CheckOrderDetailsAsync(orderId)).ReturnsAsync(orderItem);
+        [Fact]
+        public async Task CheckOutAsync_ShouldReturnExpectedResult()
+        {
+            var userId = "testUser123";
+            var expectedResult = (true, "Checkout successful", new { OrderId = "OID123" });
 
-            var result = await _orderService.CheckOrderDetailsAsync(orderId);
+            _mockOrderRepo
+                .Setup(repo => repo.CheckOutAsync(userId))
+                .ReturnsAsync(expectedResult);
 
-            Assert.NotNull(result);
-            Assert.Equal(orderId, result.OrderId);
-            Assert.Equal("prod123", result.ProductId);
-            Assert.Equal(2, result.Quantity);
+            var result = await _orderService.CheckOutAsync(userId);
+            Assert.True(result.success);
+            Assert.Equal("Checkout successful", result.message);
+            Assert.NotNull(result.data);
+
+            _mockOrderRepo.Verify(repo => repo.CheckOutAsync(userId), Times.Once);
         }
 
+        [Fact]
+        public async Task ProcessPaymentAsync_ShouldReturnExpectedResult()
+        {
+            var userId = "testUser123";
+            var paymentMethod = PaymentMethod.UPI;
+            var expectedResult = (true, "Payment processed successfully");
 
+            _mockOrderRepo
+                .Setup(repo => repo.ProcessPaymentAsync(userId, paymentMethod))
+                .ReturnsAsync(expectedResult);
+
+            var result = await _orderService.ProcessPaymentAsync(userId, paymentMethod);
+
+            Assert.True(result.success);
+            Assert.Equal("Payment processed successfully", result.message);
+
+            _mockOrderRepo.Verify(repo => repo.ProcessPaymentAsync(userId, paymentMethod), Times.Once);
+        }
     }
-
-
-
 }

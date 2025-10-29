@@ -1,14 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MinimalEshop.Infrastructure.Repositories
 {
@@ -24,32 +20,39 @@ namespace MinimalEshop.Infrastructure.Repositories
             _order = context.Orders;
             _orderItem = context.OrderItems;
         }
-        public async Task<bool> CheckOutAsync(string userId)
+        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
         {
+            var cartList = await _cart.Find(c => c.UserId == userId).ToListAsync();
 
-            var cartList = await _order.Find(c => c.UserId == userId).ToListAsync();
+            if (cartList == null || !cartList.Any())
+                return (false, "Your cart is empty. Please add items before checkout.", null);
 
-            if (!cartList.Any())
-                return false;
+            var totalAmount = cartList.Sum(c =>
+                (c.Products ?? new List<CartItem>())
+                .Sum(p => p.Price * p.Quantity)
+            );
+
             var order = new Order
             {
                 UserId = userId,
-                OrderDate = DateTime.Now,
-                TotalAmount = cartList.Sum(c => c.Products.Sum(p => p.Price))
+                OrderDate = DateTime.UtcNow,
+                TotalAmount = totalAmount,
+                Status = "Pending"
             };
 
             await _order.InsertOneAsync(order);
 
             var orderItems = new List<OrderItem>();
+
             foreach (var cart in cartList)
             {
-                foreach (var product in cart.Products)
+                foreach (var product in cart.Products ?? new List<CartItem>())
                 {
                     orderItems.Add(new OrderItem
                     {
                         OrderId = order.OrderId,
                         ProductId = product.ProductId,
-                        Quantity = 1,
+                        Quantity = product.Quantity,
                         Price = product.Price
                     });
                 }
@@ -60,39 +63,57 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             await _cart.DeleteManyAsync(c => c.UserId == userId);
 
-            return true;
-        }
-        public async Task<PaymentStatus> ProcessPaymentAsync(string orderId)
-        { 
-            var order = await _order.Find(o => o.OrderId == orderId).FirstOrDefaultAsync();
-
-            if (order == null)
-                return PaymentStatus.Failed;
-
-            var paymentMethod = order.PaymentMethod;
-            switch (paymentMethod)
+            var responseData = new
             {
-                case PaymentMethod.CashOnDelivery:
-                    return PaymentStatus.Pending;
+                order.OrderId,
+                order.UserId,
+                order.OrderDate,
+                order.TotalAmount,
+                order.Status,
+                Items = orderItems.Select(i => new
+                {
+                    i.ProductId,
+                    i.Quantity,
+                    i.Price
+                })
+            };
 
-                case PaymentMethod.UPI:
-                case PaymentMethod.NetBanking:
-                case PaymentMethod.Card:
-                    return PaymentStatus.Success;
-
-                default:
-                    return PaymentStatus.Failed;
-            }
+            return (true, "Checkout successful. Please choose your payment method.", responseData);
         }
 
-        public async Task<OrderItem> CheckOrderDetailsAsync(string orderId)
+        public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
         {
-            var orderItem = await _orderItem
-                .Find(oi => oi.OrderId == orderId)
+            var order = await _order
+                .Find(o => o.UserId == userId)
+                .SortByDescending(o => o.OrderDate)
                 .FirstOrDefaultAsync();
 
-            return orderItem;
+            if (order == null)
+                return (false, "Checkout is pending. Please complete checkout before making payment.");
+
+            var updatePaymentMethod = Builders<Order>.Update
+                .Set(o => o.PaymentMethod, paymentMethod);
+            await _order.UpdateOneAsync(o => o.OrderId == order.OrderId, updatePaymentMethod);
+
+            PaymentStatus status = paymentMethod switch
+            {
+                    PaymentMethod.CashOnDelivery => PaymentStatus.Pending,
+                    PaymentMethod.UPI or PaymentMethod.NetBanking or PaymentMethod.Card => PaymentStatus.Success,
+                    _ => PaymentStatus.Failed
+            };
+
+            var updatedStatus = status == PaymentStatus.Success ? "Completed"
+                              : status == PaymentStatus.Pending ? "Pending"
+                              : "Failed";
+
+            var updateStatus = Builders<Order>.Update
+                .Set(o => o.Status, updatedStatus);
+            await _order.UpdateOneAsync(o => o.OrderId == order.OrderId, updateStatus);
+
+            var message = $"Payment processed successfully using: {paymentMethod}";
+            return (true, message);
         }
+
 
     }
 

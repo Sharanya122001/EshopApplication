@@ -23,8 +23,6 @@ namespace MinimalEshop.Application.Service
             if (string.IsNullOrEmpty(username)) throw new ArgumentException("Username required");
             if (string.IsNullOrEmpty(password)) throw new ArgumentException("Password required");
             if (string.IsNullOrEmpty(email)) throw new ArgumentException("Email required");
-            //if (string.IsNullOrEmpty(role) || (role != "Admin" && role != "User"))
-            //    throw new ArgumentException("Role must be Admin or User");
 
             var user = new User
             {
@@ -43,6 +41,7 @@ namespace MinimalEshop.Application.Service
                 return null;
 
             var token = _jwtService.GenerateToken(
+                existingUser.UserId,
                 existingUser.Username,
                 existingUser.Role
             );

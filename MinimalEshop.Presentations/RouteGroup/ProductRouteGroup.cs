@@ -12,11 +12,6 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder ProductAPI(this RouteGroupBuilder group)
         {
-            //group.MapPost("/products", async () =>
-            //{
-            //    return "Product created";
-            //})
-            // .RequireAuthorization();
 
             group.MapGet("/", async ([FromServices] ProductService _service) =>
             {
@@ -32,21 +27,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var results = await _service.SearchProductsAsync(query);
                 return Results.Ok(results);
             }).RequireAuthorization("UserOrAdmin");
-
-            //group.MapGet("/category/{categoryId}", async ([FromServices] ProductService _service, string categoryId) =>
-            //{
-            //    if (string.IsNullOrWhiteSpace(categoryId))
-            //        return Results.BadRequest("Category ID cannot be empty");
-
-            //    var products = await _service.GetProductsByCategoryAsync(categoryId);
-
-            //    if (products == null || !products.Any())
-            //        return Results.NotFound("No products found for the given category");
-
-            //    return Results.Ok(products);
-            //});
-
-
 
             group.MapPost("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto) =>
             {

@@ -58,8 +58,6 @@ namespace Presentation
             .AddJwtBearer(options =>
             {
                 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
-                //options.RequireHttpsMetadata = true;
-                //options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                     {
                     ValidateIssuerSigningKey = true,
@@ -139,37 +137,6 @@ namespace Presentation
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //app.Use(async (context, next) =>
-            //{
-            //    await next();
-
-            //    if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-            //        {
-            //        if (!context.Response.HasStarted)
-            //            {
-            //            context.Response.ContentType = "application/json";
-            //            await context.Response.WriteAsJsonAsync(new
-            //                {
-            //                status = 403,
-            //                message = "You are not authorized to perform this action."
-            //                });
-            //            }
-            //        }
-            //    else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-            //        {
-            //        if (!context.Response.HasStarted)
-            //            {
-            //            context.Response.ContentType = "application/json";
-            //            await context.Response.WriteAsJsonAsync(new
-            //                {
-            //                status = 401,
-            //                message = "Authentication required. Please log in."
-            //                });
-            //            }
-            //        }
-            //});
-
 
             app.MapGroup("/cart").CartAPI();
             app.MapGroup("/products").ProductAPI();

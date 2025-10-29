@@ -23,12 +23,6 @@ namespace MinimalEshop.Application.Service
             return await _product.SearchAsync(keyword);
         }
 
-        //public async Task<List<Product>> GetProductsByCategoryAsync(string categoryId)
-        //    {
-        //    return await _product.GetByCategoryAsync(categoryId);
-        //    }
-
-
         public async Task<Product> CreateProductAsync(Product product)
         {
              return await _product.AddAsync(product);

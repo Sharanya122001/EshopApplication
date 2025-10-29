@@ -6,13 +6,20 @@ namespace MinimalEshop.Application.Service
     public class CartService
     {
         private readonly ICart _cart;
+        private readonly IProduct _product;
 
-        public CartService(ICart cart)
+        public CartService(ICart cart, IProduct product)
         {
             _cart = cart;
-        }
+            _product = product;
+
+            }
         public async Task<bool> AddToCartAsync(string productId, int quantity, string userId)
             {
+            var product = await _product.GetProductByIdAsync(productId);
+            if (product == null)
+                return false;
+
             var cart = new Cart
                 {
                 UserId = userId,
@@ -21,13 +28,14 @@ namespace MinimalEshop.Application.Service
                     new CartItem
                     {
                         ProductId = productId,
-                        Quantity = quantity
+                        Quantity = quantity,
+                        Price = product.Price 
                     }
                 }
-            };
+                };
 
             return await _cart.AddToCartAsync(cart);
-        }
+            }
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
         {

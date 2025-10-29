@@ -9,10 +9,7 @@ namespace MinimalEshop.Application.DTO
 {
     public class CartDto
     {
-        public string CartId { get; set; }
         public string ProductId { get; set; }
         public int Quantity { get; set; }
-        public string UserId { get; set; }
-        //public Product Product { get; set; }
     }
 }

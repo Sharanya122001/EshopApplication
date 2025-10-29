@@ -8,23 +8,23 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace MinimalEshop.Infrastructure.Repositories
-{
-    public class ProductRepository : IProduct
     {
+    public class ProductRepository : IProduct
+        {
         private readonly IMongoCollection<Product> _products;
 
         public ProductRepository(MongoDbContext context)
-        {
+            {
             _products = context.Products;
-        }
+            }
 
         public async Task<List<Product>> GetAllAsync()
-        {
+            {
             return await _products.Find(_ => true).ToListAsync();
-        }
+            }
 
         public async Task<List<Product>> SearchAsync(string keyword)
-            {
+        {
             if (string.IsNullOrWhiteSpace(keyword))
                 return new List<Product>();
 
@@ -32,13 +32,8 @@ namespace MinimalEshop.Infrastructure.Repositories
                 p => p.Name,
                 new MongoDB.Bson.BsonRegularExpression(keyword, "i"));
             return await _products.Find(filter).ToListAsync();
-            }
-
-        //public async Task<List<Product>> GetByCategoryAsync(string categoryId)
-        //    {
-        //    var filter = Builders<Product>.Filter.Eq("CategoryId", categoryId);
-        //    return await _products.Find(filter).ToListAsync();
-        //    }
+        }
+        
 
         public async Task<Product> AddAsync(Product product)
         {
@@ -60,5 +55,9 @@ namespace MinimalEshop.Infrastructure.Repositories
             var result = await _products.DeleteOneAsync(p => p.ProductId == ProductId);
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
-    }
+        public async Task<Product?> GetProductByIdAsync(string productId)
+            {
+            return await _products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
+            }
+        }
 }

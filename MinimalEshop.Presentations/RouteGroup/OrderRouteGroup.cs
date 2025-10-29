@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
+using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -12,50 +13,37 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/checkout", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
+            group.MapPost("/checkout", async ( ClaimsPrincipal user,OrderService orderService) =>
             {
-                var order = new Order
-                    {
-                    UserId = orderDto.UserId,
-                    //OrderDate = orderDto.OrderDate,
-                    TotalAmount = orderDto.TotalAmount,
-                    Status = orderDto.Status
-                    };
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var checkout = await _service.CheckOutAsync(orderDto.UserId);
-                return Results.Ok(checkout);
-            }).RequireAuthorization("UserOrAdmin");
+                var (success, message, data) = await orderService.CheckOutAsync(userId);
 
-            group.MapPost("/payment", async ([FromServices] OrderService _service, [FromBody] OrderDto orderDto) =>
-            {
-                var order = new Order
+                if (!success)
+                    return Results.BadRequest(new { message });
+
+                return Results.Ok(new
                 {
-                    OrderId = orderDto.OrderId,
-                    UserId = orderDto.UserId,
-                    //OrderDate = orderDto.OrderDate,
-                    TotalAmount = orderDto.TotalAmount,
-                    Status = orderDto.Status
-                };
+                    message,
+                    data
+                });
+            });
 
-                var paymentStatus = await _service.ProcessPaymentAsync(orderDto.OrderId);
-                return Results.Ok(paymentStatus);
-            }).RequireAuthorization("UserOrAdmin");
 
-            group.MapGet("/details", async ([FromServices] OrderService _service, [FromQuery] string orderId) =>
+            group.MapPost("/paymentprocess", async (ClaimsPrincipal user,[FromBody] PaymentRequest request,OrderService orderService) =>
             {
-                //var order = new Order
-                //{
-                //    OrderId = orderDto.OrderId,
-                //    UserId = orderDto.UserId,
-                //    OrderDate = orderDto.OrderDate,
-                //    TotalAmount = orderDto.TotalAmount,
-                //    Status = orderDto.Status
-                //};
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var orderDetails = await _service.CheckOrderDetailsAsync(orderId);
-                return Results.Ok(orderDetails);
-            }).RequireAuthorization("UserOrAdmin");
+                if (string.IsNullOrEmpty(userId))
+                    return Results.Unauthorized();
 
+                var (success, message) = await orderService.ProcessPaymentAsync(userId, request.PaymentProcess);
+
+                if (!success)
+                    return Results.BadRequest(new { message });
+
+                return Results.Ok(new { message });
+            });
             return group;
         }
 

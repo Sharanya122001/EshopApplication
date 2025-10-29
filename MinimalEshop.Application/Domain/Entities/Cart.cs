@@ -8,8 +8,6 @@ namespace MinimalEshop.Application.Domain.Entities
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string CartId { get; set; }
-        //public string ProductId { get; set; }
-        //public int Quantity { get; set; }
         public string UserId { get; set; }
         public List<CartItem> Products { get; set; } = new();
     }

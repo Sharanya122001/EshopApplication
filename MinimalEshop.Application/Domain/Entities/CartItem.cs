@@ -7,4 +7,6 @@ public class CartItem
 
     [BsonElement("Quantity")]
     public int Quantity { get; set; }
+    [BsonElement("Price")]
+    public decimal Price { get; set; }
 }

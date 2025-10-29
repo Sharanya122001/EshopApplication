@@ -13,6 +13,7 @@ namespace MinimalEshop.Application.Domain.Entities
         public object ProductId { get; set; }
         public object Quantity { get; set; }
         public object Price { get; set; }
+
         public PaymentMethod PaymentMethod { get; set; }
         public PaymentStatus paymentStatus { get; set; }
         public OrderStatus OrderStatus { get; set; }

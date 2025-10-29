@@ -47,23 +47,25 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task LoginAsync_WithValidUser_ReturnsToken()
             {
+            var userId = "123";
             var username = "testuser";
             var password = "password123";
             var role = "Customer";
 
             var user = new User
-                {
+            {
+                UserId=userId,
                 Username = username,
                 Password = password,
                 Role = role
-                };
+            };
 
             _userRepositoryMock
                 .Setup(repo => repo.GetUserByUsernameAsync(username))
                 .ReturnsAsync(user);
 
             _tokenServiceMock
-                .Setup(ts => ts.GenerateToken(username, role))
+                .Setup(ts => ts.GenerateToken(userId,username, role))
                 .Returns("dummy-token");
 
             var token = await _userService.LoginAsync(username, password);
@@ -71,7 +73,7 @@ namespace MinimalEshop.Application.Test.Services
             Assert.Equal("dummy-token", token);
 
             _userRepositoryMock.Verify(repo => repo.GetUserByUsernameAsync(username), Times.Once);
-            _tokenServiceMock.Verify(ts => ts.GenerateToken(username, role), Times.Once);
+            _tokenServiceMock.Verify(ts => ts.GenerateToken(userId, username, role), Times.Once);
             }
 
         [Fact]

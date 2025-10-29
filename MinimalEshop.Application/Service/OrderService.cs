@@ -18,23 +18,13 @@ namespace MinimalEshop.Application.Service
             _context = context;
         }
 
-        public async Task<bool> CheckOutAsync(string UserId)
+        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
+           => await _context.CheckOutAsync(userId);
+
+        public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
         {
-            var result = await _context.CheckOutAsync(UserId);
-            return true;
+            return await _context.ProcessPaymentAsync(userId, paymentMethod);
         }
 
-        public async Task<PaymentStatus> ProcessPaymentAsync(string OrderId)
-        {
-            return await _context.ProcessPaymentAsync(OrderId);
         }
-
-        public async Task<OrderItem> CheckOrderDetailsAsync(string OrderId)
-        {
-            return await _context.CheckOrderDetailsAsync(OrderId);
-
-        }
-
-
-    }
 }

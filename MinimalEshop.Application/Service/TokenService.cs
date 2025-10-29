@@ -25,7 +25,7 @@ namespace MinimalEshop.Application.Service
             _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         }
 
-        public string GenerateToken(string username, string role)
+        public string GenerateToken(string userId,string username, string role)
             {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(_keyBytes);
@@ -33,7 +33,8 @@ namespace MinimalEshop.Application.Service
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

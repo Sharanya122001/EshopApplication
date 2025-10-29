@@ -8,7 +8,7 @@ namespace MinimalEshop.Application.Interface
     {
         Task<List<Product>> GetAllAsync();
         Task<List<Product>> SearchAsync(string keyword);
-        //Task<List<Product>> GetByCategoryAsync(string categoryId);
+        Task<Product?> GetProductByIdAsync(string id);
         Task<Product> AddAsync(Product product);
         Task<bool> UpdateAsync(Product product);
         Task<bool> DeleteAsync(string productId);
