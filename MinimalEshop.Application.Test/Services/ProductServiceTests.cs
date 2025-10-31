@@ -9,7 +9,6 @@ namespace MinimalEshop.Application.Test.Services
     {
         private readonly ProductService _productService;
         private readonly Mock<IProduct> _productRepositoryMock;
-
         public ProductServiceTests()
         {
             _productRepositoryMock = new Mock<IProduct>();
@@ -30,7 +29,6 @@ namespace MinimalEshop.Application.Test.Services
             Assert.Equal(2, result.Count);
             Assert.Equal(products[0].ProductId, result[0].ProductId);
             Assert.Equal(products[1].Name, result[1].Name);
-
         }
        
         [Fact]
