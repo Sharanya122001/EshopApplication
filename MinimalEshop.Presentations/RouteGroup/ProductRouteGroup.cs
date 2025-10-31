@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
+using MinimalEshop.Presentation.Responses;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -16,17 +17,17 @@ namespace MinimalEshop.Presentation.RouteGroup
             group.MapGet("/", async ([FromServices] ProductService _service) =>
             {
                 var product = await _service.GetProductAsync();
-                return product;
+                return Results.Ok(Result.Ok(product, null, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Product");
 
             group.MapGet("/products/search", async ([FromServices] ProductService _service, [FromQuery] string query) =>
             {
                 if (string.IsNullOrWhiteSpace(query))
-                    return Results.BadRequest("Query cannot be empty");
+                    return Results.BadRequest(Result.Fail(null, "Query cannot be empty", StatusCodes.Status400BadRequest));
 
                 var results = await _service.SearchProductsAsync(query);
-                return Results.Ok(results);
+                return Results.Ok(Result.Ok(results, null, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Product");
 
@@ -41,7 +42,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     Addedon = productDto.Addedon
                 };
                 var created = await _service.CreateProductAsync(product);
-                return created;
+                return Results.Ok(Result.Ok(created, "Product created", StatusCodes.Status201Created));
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 
@@ -58,14 +59,14 @@ namespace MinimalEshop.Presentation.RouteGroup
                 };
 
                 var updated = await _service.UpdateProductAsync(product);
-                return Results.Ok(updated);
+                return Results.Ok(Result.Ok(updated, updated ? "Product updated" : "Product update failed", StatusCodes.Status200OK));
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 
             group.MapDelete("/delete", async ([FromServices] ProductService _service, [FromQuery] string ProductId) =>
             {
                 var deleted = await _service.DeleteProductAsync(ProductId);
-                return Results.Ok(deleted);
+                return Results.Ok(Result.Ok(deleted, deleted ? "Product deleted" : "Product delete failed", StatusCodes.Status200OK));
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 

@@ -6,6 +6,7 @@ using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using System.Security.Claims;
+using MinimalEshop.Presentation.Responses;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -20,13 +21,9 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var (success, message, data) = await orderService.CheckOutAsync(userId);
 
                 if (!success)
-                    return Results.BadRequest(new { message });
+                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
-                return Results.Ok(new
-                {
-                    message,
-                    data
-                });
+                return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
@@ -41,9 +38,9 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var (success, message) = await orderService.ProcessPaymentAsync(userId, request.PaymentProcess);
 
                 if (!success)
-                    return Results.BadRequest(new { message });
+                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
-                return Results.Ok(new { message });
+                return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
@@ -57,9 +54,9 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var (success, message, data) = await orderService.GetOrderDetailsAsync(userId);
 
                 if (!success)
-                    return Results.BadRequest(new { message });
+                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
-                return Results.Ok(new { message, data });
+                return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             })
 .RequireAuthorization("UserOrAdmin")
 .WithTags("Order");

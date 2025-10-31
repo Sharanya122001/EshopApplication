@@ -13,15 +13,16 @@ using MinimalEshop.Infrastructure.Data;
 using MinimalEshop.Infrastructure.Repositories;
 using MinimalEshop.Presentation;
 using MinimalEshop.Presentation.RouteGroup;
+using MinimalEshop.Presentation.Responses;
 using MongoDB.Driver;
 using System.Text;
 
 namespace Presentation
+{
+    public class Program //add global exceptional handler
     {
-    public class Program
-        {
         public static void Main(string[] args)
-            {
+        {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.Configure<JwtSettings>(
@@ -48,6 +49,7 @@ namespace Presentation
             builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<CategoryService>();
 
+            // TokenService depends on JwtSettings via IOptions<JwtSettings>
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddAuthentication(options =>
@@ -58,8 +60,15 @@ namespace Presentation
             .AddJwtBearer(options =>
             {
                 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
+
+                if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Key))
+                {
+                    // If configuration is missing, throw early with a helpful message
+                    throw new InvalidOperationException("JWT settings are not configured. Ensure 'Jwt' section exists with a non-empty 'Key'.");
+                }
+
                 options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings.Key)
@@ -70,7 +79,7 @@ namespace Presentation
                     ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30)
-                    };
+                };
             });
 
             builder.Services.AddAuthorization(options =>
@@ -83,10 +92,10 @@ namespace Presentation
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
-                    {
+                {
                     Title = "MinimalEshop API",
                     Version = "v1"
-                    });
+                });
 
                 var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
@@ -98,8 +107,8 @@ namespace Presentation
                     Description = "Enter 'Bearer' [space] and then your valid token.",
                     Reference = new OpenApiReference
                     {
-                          Id = JwtBearerDefaults.AuthenticationScheme,
-                          Type = ReferenceType.SecurityScheme
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
                     }
                 };
 
@@ -112,27 +121,45 @@ namespace Presentation
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
+            // Global exception handler middleware returning standard Result
+            app.UseExceptionHandler(errApp =>
+            {
+                errApp.Run(async context =>
                 {
+                    context.Response.ContentType = "application/json";
+
+                    var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                    var ex = feature?.Error;
+
+                    var result = Result.Fail(new[] { ex?.Message ?? "An unexpected error occurred." }, "An error occurred while processing your request.", 500);
+
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsJsonAsync(result);
+                });
+            });
+
+            if (app.Environment.IsDevelopment())
+            {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                }
+            }
 
             app.UseHttpsRedirection();
+
             app.Use(async (context, next) =>
             {
                 await next();
 
                 if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-                    {
+                {
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"message\": \"You are not authorized to access this resource.\"}");
-                    }
+                    await context.Response.WriteAsJsonAsync(Result.Fail(null, "You are not authorized to access this resource.", StatusCodes.Status403Forbidden));
+                }
                 else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                    {
+                {
                     context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"message\": \"Authentication is required.\"}");
-                    }
+                    await context.Response.WriteAsJsonAsync(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized));
+                }
             });
 
             app.UseAuthentication();
@@ -145,7 +172,7 @@ namespace Presentation
 
             app.Run();
 
-            }
         }
     }
+}
 
