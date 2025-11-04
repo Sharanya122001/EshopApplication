@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Domain.Enums;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;
 using MongoDB.Driver;
@@ -20,68 +21,76 @@ namespace MinimalEshop.Infrastructure.Repositories
             _order = context.Orders;
             _orderItem = context.OrderItems;
         }
-        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
+
+        public async Task<CheckoutResponseDto> CheckOutAsync(string userId)
         {
-            var cartList = await _cart.Find(c => c.UserId == userId).ToListAsync();
+        var cartList = await _cart.Find(c => c.UserId == userId).ToListAsync();
 
-            if (cartList == null || !cartList.Any())
-                return (false, "Your cart is empty. Please add items before checkout.", null);
-
-            var totalAmount = cartList.Sum(c =>
-                (c.Products ?? new List<CartItem>())
-                .Sum(p => p.Price * p.Quantity)
-            );
-
-            var order = new Order
+        if (cartList == null || !cartList.Any())
             {
-                UserId = userId,
-                OrderDate = DateTime.UtcNow,
-                TotalAmount = totalAmount,
-                Status = "Pending"
+            return new CheckoutResponseDto
+                {
+                Message = "Your cart is empty. Please add items before checkout.",
+                Status = "Failed"
+                };
+            }
+
+        var totalAmount = cartList.Sum(c =>
+            (c.Products ?? new List<CartItem>())
+            .Sum(p => p.Price * p.Quantity)
+        );
+
+        var order = new Order
+            {
+            UserId = userId,
+            OrderDate = DateTime.UtcNow,
+            TotalAmount = totalAmount,
+            Status = "Pending"
             };
 
-            await _order.InsertOneAsync(order);
+        await _order.InsertOneAsync(order);
 
-            var orderItems = new List<OrderItem>();
+        var orderItems = new List<OrderItem>();
 
-            foreach (var cart in cartList)
+        foreach (var cart in cartList)
             {
-                foreach (var product in cart.Products ?? new List<CartItem>())
+            foreach (var product in cart.Products ?? new List<CartItem>())
                 {
-                    orderItems.Add(new OrderItem
+                orderItems.Add(new OrderItem
                     {
-                        OrderId = order.OrderId,
-                        ProductId = product.ProductId,
-                        Quantity = product.Quantity,
-                        Price = product.Price
+                    OrderId = order.OrderId,
+                    ProductId = product.ProductId,
+                    Quantity = product.Quantity,
+                    Price = product.Price
                     });
                 }
             }
 
-            if (orderItems.Any())
-                await _orderItem.InsertManyAsync(orderItems);
+        if (orderItems.Any())
+            await _orderItem.InsertManyAsync(orderItems);
 
-            await _cart.DeleteManyAsync(c => c.UserId == userId);
+        await _cart.DeleteManyAsync(c => c.UserId == userId);
 
-            var responseData = new
+
+        return new CheckoutResponseDto
             {
-                order.OrderId,
-                order.UserId,
-                order.OrderDate,
-                order.TotalAmount,
-                order.Status,
-                Items = orderItems.Select(i => new
+            OrderId = order.OrderId,
+            UserId = order.UserId,
+            OrderDate = order.OrderDate,
+            TotalAmount = order.TotalAmount,
+            Status = order.Status,
+            Message = "Checkout successful. Please proceed with payment.",
+            Items = orderItems.Select(i => new CheckoutItemDto
                 {
-                    i.ProductId,
-                    i.Quantity,
-                    i.Price
-                })
+                ProductId = i.ProductId.ToString(),
+                Quantity = Convert.ToInt32(i.Quantity),
+                Price = i.Price
+                }).ToList()
             };
-
-            return (true, "Checkout successful. Please choose your payment method.", responseData);
         }
 
-        public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
+
+    public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
         {
             var order = await _order
                 .Find(o => o.UserId == userId)

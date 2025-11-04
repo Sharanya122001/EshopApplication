@@ -28,7 +28,7 @@ namespace MinimalEshop.Application.Service
         public string GenerateToken(string userId,string username, string role)
             {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(_keyBytes);
+            var key = new SymmetricSecurityKey(_keyBytes);//read
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -36,7 +36,7 @@ namespace MinimalEshop.Application.Service
                 new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())//read
             };
 
             var token = new JwtSecurityToken(

@@ -9,10 +9,13 @@ namespace MinimalEshop.Application.Domain.Entities
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string OrderItemId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
         public string OrderId { get; set; }
-        public object ProductId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ProductId { get; set; }
         public object Quantity { get; set; }
-        public object Price { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public decimal Price { get; set; }
 
         public PaymentMethod PaymentMethod { get; set; }
         public PaymentStatus paymentStatus { get; set; }

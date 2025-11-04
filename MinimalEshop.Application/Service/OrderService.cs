@@ -1,12 +1,13 @@
 ﻿using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.Domain.Enums;
+using MinimalEshop.Application.DTO;
+using MinimalEshop.Application.Helper;
+using MinimalEshop.Application.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MinimalEshop.Application.Interface;
-using MinimalEshop.Application.Helper;
-using MinimalEshop.Application.Domain.Enums;
 
 namespace MinimalEshop.Application.Service
 {
@@ -18,8 +19,8 @@ namespace MinimalEshop.Application.Service
             _context = context;
         }
 
-        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
-           => await _context.CheckOutAsync(userId);
+        public async Task<CheckoutResponseDto> CheckOutAsync(string userId)
+             => await _context.CheckOutAsync(userId);
 
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
         {

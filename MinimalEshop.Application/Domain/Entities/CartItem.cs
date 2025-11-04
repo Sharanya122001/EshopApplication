@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 public class CartItem
 {
@@ -7,6 +8,6 @@ public class CartItem
 
     [BsonElement("Quantity")]
     public int Quantity { get; set; }
-    [BsonElement("Price")]
+    [BsonRepresentation(BsonType.Decimal128)]
     public decimal Price { get; set; }
 }

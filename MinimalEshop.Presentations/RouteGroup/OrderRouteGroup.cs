@@ -13,21 +13,22 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/checkout", async ( ClaimsPrincipal user,OrderService orderService) =>
+            group.MapPost("/checkout", async ([FromServices] OrderService _service,HttpContext httpContext) =>
             {
-                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userId = httpContext.User.FindFirst("id")?.Value
+                             ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                var (success, message, data) = await orderService.CheckOutAsync(userId);
+                if (string.IsNullOrEmpty(userId))
+                    return Results.Unauthorized();
 
-                if (!success)
-                    return Results.BadRequest(new { message });
+                var response = await _service.CheckOutAsync(userId);
 
-                return Results.Ok(new
-                {
-                    message,
-                    data
-                });
-            }).RequireAuthorization("UserOrAdmin")
+                if (response.Status == "Failed")
+                    return Results.BadRequest(response);
+
+                return Results.Ok(response);
+            })
+            .RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
 

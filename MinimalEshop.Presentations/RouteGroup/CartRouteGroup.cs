@@ -13,27 +13,13 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/add", async ([FromServices] CartService _service,[FromBody] CartDto cartDto,HttpContext httpContext) =>
+            group.MapPost("/add", async ([FromServices] CartService _service, [FromBody] CartDto cartDto, HttpContext httpContext) =>
             {
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(userId))
                     return Results.Unauthorized();
-
-
-                var cart = new Cart
-                {
-                   UserId = userId,
-                   Products = new List<CartItem>
-                   {
-                       new CartItem
-                       {
-                           ProductId = cartDto.ProductId,
-                           Quantity = cartDto.Quantity
-                       }
-                   }
-                };
 
                 var created = await _service.AddToCartAsync(
                     cartDto.ProductId,
@@ -42,21 +28,37 @@ namespace MinimalEshop.Presentation.RouteGroup
                 );
 
                 return created
-                    ? Results.Ok(new { message = "Product added to cart successfully." })
+                    ? Results.Ok(new { message = "Product added or updated in cart successfully." })
                     : Results.BadRequest(new { message = "Failed to add product to cart." });
 
             }).RequireAuthorization("UserOrAdmin")
-            .WithTags("Cart");
+              .WithTags("Cart");
 
 
-            group.MapDelete("/delete", async ([FromServices] CartService _service, [FromQuery] string userId, [FromQuery] string productId) =>
+
+            group.MapDelete("/delete/{productId}/{quantity}", async (
+    [FromServices] CartService _service,
+    HttpContext httpContext,
+    string productId,
+    int quantity
+) =>
             {
-                var deleted = await _service.DeleteProductFromCartAsync(userId, productId);
+                var userId = httpContext.User.FindFirst("id")?.Value
+                             ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                    return Results.Unauthorized();
+
+                var deleted = await _service.DeleteAsync(userId, productId, quantity);
+
                 return deleted
-                    ? Results.Ok(new { message = "Product removed from cart." })
-                    : Results.NotFound(new { message = "Product not found in cart." });
-            }).RequireAuthorization("UserOrAdmin")
-            .WithTags("Cart");
+                    ? Results.Ok(new { message = $"Removed {quantity} quantity of product {productId} from cart." })
+                    : Results.BadRequest(new { message = "Failed to remove product from cart." });
+            })
+.RequireAuthorization("UserOrAdmin")
+.WithTags("Cart");
+
+
 
 
             group.MapGet("/getcart", async (HttpContext context, [FromServices] CartService _service) =>

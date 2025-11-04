@@ -15,6 +15,7 @@ namespace MinimalEshop.Application.Domain.Entities
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
+        // add the list of orderitems
 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
