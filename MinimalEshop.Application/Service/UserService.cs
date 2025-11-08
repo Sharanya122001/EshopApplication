@@ -1,10 +1,10 @@
 ﻿using MinimalEshop.Application.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Interface;
+using MinimalEshop.Application.Validator;
+using System.ComponentModel.DataAnnotations;
+using FluentValidation;
+using FluentValidation.Results;
 
 namespace MinimalEshop.Application.Service
 {
@@ -20,9 +20,22 @@ namespace MinimalEshop.Application.Service
         }
         public async Task<User> RegisterUserAsync(string username, string password, string email, string role)
         {
-            if (string.IsNullOrEmpty(username)) throw new ArgumentException("Username required");
-            if (string.IsNullOrEmpty(password)) throw new ArgumentException("Password required");
-            if (string.IsNullOrEmpty(email)) throw new ArgumentException("Email required");
+            var userDto = new UserDto
+            {
+                Username = username,
+                Password = password,
+                Email = email,
+                Role = role
+            };
+
+            var validator = new UserDtoValidator();
+            FluentValidation.Results.ValidationResult validationResult = validator.Validate(userDto);
+
+            if (!validationResult.IsValid)
+            {
+                var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                throw new ArgumentException(errors);
+            }
 
             var user = new User
             {
@@ -47,8 +60,8 @@ namespace MinimalEshop.Application.Service
             );
 
             return token;
-            }
-
         }
+
+    }
 
 }

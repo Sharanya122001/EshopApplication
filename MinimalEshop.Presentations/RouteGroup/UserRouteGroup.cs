@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using System.Security.Claims;
 using MinimalEshop.Presentation.Responses;
+using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
 {
@@ -14,8 +15,18 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder UserAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/Register", async ([FromServices] UserService _service, [FromBody] UserDto userDto) =>//add the validation see in fluent validation library
+            group.MapPost("/Register", async ([FromServices] UserService _service, [FromServices] IValidator<UserDto> validator, [FromBody] UserDto userDto) =>
             {
+                if (userDto == null)
+                    return Results.BadRequest(Result.Fail(null, "Invalid request body.", StatusCodes.Status400BadRequest));
+
+                var validationResult = await validator.ValidateAsync(userDto);
+                if (!validationResult.IsValid)
+                {
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
+                }
+
                 var user = new User
                 {
                     Username = userDto.Username,

@@ -7,7 +7,6 @@ namespace MinimalEshop.Application.Interface
     {
         Task<User> RegisterAsync(User user);
         Task<User?> GetUserByUsernameAsync(string username);
-        Task<User?> LoginAsync(string username, string password);
 
-        }
     }
+}

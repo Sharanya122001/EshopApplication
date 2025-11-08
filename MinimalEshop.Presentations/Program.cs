@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -8,14 +9,17 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
+using MinimalEshop.Application.Validator;
 using MinimalEshop.Infrastructure.Context;
 using MinimalEshop.Infrastructure.Data;
 using MinimalEshop.Infrastructure.Repositories;
 using MinimalEshop.Presentation;
-using MinimalEshop.Presentation.RouteGroup;
 using MinimalEshop.Presentation.Responses;
+using MinimalEshop.Presentation.RouteGroup;
 using MongoDB.Driver;
 using System.Text;
+using FluentValidation.AspNetCore;
+
 
 namespace Presentation
 {
@@ -48,6 +52,12 @@ namespace Presentation
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<CategoryService>();
+
+            builder.Services.AddControllers()
+              .AddFluentValidation(fv =>
+              {
+                  fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>();
+              });
 
             // TokenService depends on JwtSettings via IOptions<JwtSettings>
             builder.Services.AddScoped<ITokenService, TokenService>();
