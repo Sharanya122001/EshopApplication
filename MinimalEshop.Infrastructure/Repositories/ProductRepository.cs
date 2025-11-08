@@ -14,14 +14,14 @@ namespace MinimalEshop.Infrastructure.Repositories
         private readonly IMongoCollection<Product> _products;
 
         public ProductRepository(MongoDbContext context)
-            {
+        {
             _products = context.Products;
-            }
+        }
 
         public async Task<List<Product>> GetAllAsync()
-            {
+        {
             return await _products.Find(_ => true).ToListAsync();
-            }
+        }
 
         public async Task<List<Product>> SearchAsync(string keyword)
         {

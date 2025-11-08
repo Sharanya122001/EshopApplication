@@ -23,7 +23,7 @@ using FluentValidation.AspNetCore;
 
 namespace Presentation
 {
-    public class Program //add global exceptional handler
+    public class Program
     {
         public static void Main(string[] args)
         {
@@ -59,7 +59,6 @@ namespace Presentation
                   fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>();
               });
 
-            // TokenService depends on JwtSettings via IOptions<JwtSettings>
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddAuthentication(options =>
@@ -73,7 +72,6 @@ namespace Presentation
 
                 if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Key))
                 {
-                    // If configuration is missing, throw early with a helpful message
                     throw new InvalidOperationException("JWT settings are not configured. Ensure 'Jwt' section exists with a non-empty 'Key'.");
                 }
 
@@ -131,7 +129,7 @@ namespace Presentation
 
             var app = builder.Build();
 
-            // Global exception handler middleware returning standard Result
+            // Global exception handler
             app.UseExceptionHandler(errApp =>
             {
                 errApp.Run(async context =>

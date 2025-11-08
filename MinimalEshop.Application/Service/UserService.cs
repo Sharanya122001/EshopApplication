@@ -19,24 +19,7 @@ namespace MinimalEshop.Application.Service
 
         }
         public async Task<User> RegisterUserAsync(string username, string password, string email, string role)
-        {
-            var userDto = new UserDto
-            {
-                Username = username,
-                Password = password,
-                Email = email,
-                Role = role
-            };
-
-            var validator = new UserDtoValidator();
-            FluentValidation.Results.ValidationResult validationResult = validator.Validate(userDto);
-
-            if (!validationResult.IsValid)
-            {
-                var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new ArgumentException(errors);
-            }
-
+        { 
             var user = new User
             {
                 Username = username,
