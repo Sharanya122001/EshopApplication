@@ -21,7 +21,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Product");
 
-            group.MapGet("/products/search", async ([FromServices] ProductService _service, [FromQuery] string query) =>
+            group.MapGet("/search", async ([FromServices] ProductService _service, [FromQuery] string query) =>
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return Results.BadRequest(Result.Fail(null, "Query cannot be empty", StatusCodes.Status400BadRequest));

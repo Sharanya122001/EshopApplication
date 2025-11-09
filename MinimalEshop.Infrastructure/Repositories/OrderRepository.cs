@@ -52,6 +52,7 @@ namespace MinimalEshop.Infrastructure.Repositories
                     {
                         OrderId = order.OrderId,
                         ProductId = product.ProductId,
+                        Name = product.Name,
                         Quantity = product.Quantity,
                         Price = product.Price
                     });
@@ -73,6 +74,7 @@ namespace MinimalEshop.Infrastructure.Repositories
                 Items = orderItems.Select(i => new
                 {
                     i.ProductId,
+                    i.Name,
                     i.Quantity,
                     i.Price
                 })
@@ -82,7 +84,11 @@ namespace MinimalEshop.Infrastructure.Repositories
         }
 
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
-        {
+            {
+
+            if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.Card)
+                return (false, "Invalid payment method.");
+
             var order = await _order
                 .Find(o => o.UserId == userId)
                 .SortByDescending(o => o.OrderDate)
@@ -91,20 +97,29 @@ namespace MinimalEshop.Infrastructure.Repositories
             if (order == null)
                 return (false, "Checkout is pending. Please complete checkout before making payment.");
 
+            if (order.Status == "Completed")
+                return (false, "Payment is already done.");
+
             var updatePaymentMethod = Builders<Order>.Update
                 .Set(o => o.PaymentMethod, paymentMethod);
             await _order.UpdateOneAsync(o => o.OrderId == order.OrderId, updatePaymentMethod);
 
             PaymentStatus status = paymentMethod switch
-            {
+                {
                     PaymentMethod.CashOnDelivery => PaymentStatus.Pending,
                     PaymentMethod.UPI or PaymentMethod.NetBanking or PaymentMethod.Card => PaymentStatus.Success,
                     _ => PaymentStatus.Failed
-            };
+                    };
+
+            order.PaymentStatus = status;
+            await _order.UpdateOneAsync(
+                o => o.OrderId == order.OrderId,
+                Builders<Order>.Update.Set(o => o.PaymentStatus, status)
+            );
 
             var updatedStatus = status == PaymentStatus.Success ? "Completed"
-                              : status == PaymentStatus.Pending ? "Pending"
-                              : "Failed";
+                               : status == PaymentStatus.Pending ? "Pending"
+                               : "Failed";
 
             var updateStatus = Builders<Order>.Update
                 .Set(o => o.Status, updatedStatus);
@@ -112,7 +127,7 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             var message = $"Payment processed successfully using: {paymentMethod}";
             return (true, message);
-        }
+            }
 
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
             {
@@ -140,6 +155,7 @@ namespace MinimalEshop.Infrastructure.Repositories
                 Items = orderItems.Select(i => new
                     {
                     i.ProductId,
+                    i.Name,
                     i.Quantity,
                     i.Price
                     })

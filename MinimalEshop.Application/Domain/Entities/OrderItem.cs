@@ -11,6 +11,7 @@ namespace MinimalEshop.Application.Domain.Entities
         public string OrderItemId { get; set; }
         public string OrderId { get; set; }
         public object ProductId { get; set; }
+        public string Name { get; set; } = default!;
         public object Quantity { get; set; }
         public object Price { get; set; }
 

@@ -39,21 +39,35 @@ namespace MinimalEshop.Infrastructure.Repositories
             return true;
         }
 
+        public async Task<bool> DeleteAsync(string userId, string productId, int quantity)
+            {
+            var cart = await _carts.Find(c => c.UserId == userId).FirstOrDefaultAsync();
+            if (cart == null) return false;
 
-        public async Task<bool> DeleteAsync(string userId, string productId)
-        {
-            var update = Builders<Cart>.Update.PullFilter(
-                c => c.Products,
-                p => p.ProductId == productId
-            );
+            var product = cart.Products.FirstOrDefault(p => p.ProductId == productId);
+            if (product == null) return false;
 
-            var result = await _carts.UpdateOneAsync(
-                c => c.UserId == userId,
-                update
-            );
+            if (quantity >= product.Quantity)
+                {
+                var update = Builders<Cart>.Update.PullFilter(
+                    c => c.Products,
+                    p => p.ProductId == productId
+                );
 
-            return result.IsAcknowledged && result.ModifiedCount > 0;
-        }
+                await _carts.UpdateOneAsync(c => c.UserId == userId, update);
+                }
+            else
+                {
+                var update = Builders<Cart>.Update.Inc("Products.$.Quantity", -quantity);
+                await _carts.UpdateOneAsync(
+                    c => c.UserId == userId && c.Products.Any(p => p.ProductId == productId),
+                    update
+                );
+                }
+
+            return true;
+            }
+
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
         {

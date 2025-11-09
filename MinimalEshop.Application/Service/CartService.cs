@@ -28,6 +28,7 @@ namespace MinimalEshop.Application.Service
                     new CartItem
                     {
                         ProductId = productId,
+                         Name = product.Name,
                         Quantity = quantity,
                         Price = product.Price 
                     }
@@ -38,12 +39,28 @@ namespace MinimalEshop.Application.Service
             }
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
-        {
-            return await _cart.GetCartByUserIdAsync(userId);
-        }
-        public async Task<bool> DeleteProductFromCartAsync(string userId, string productId)
-        {
-            return await _cart.DeleteAsync(userId, productId);
+            {
+            var cart = await _cart.GetCartByUserIdAsync(userId);
+            if (cart == null) return null;
+
+            foreach (var item in cart.Products)
+                {
+                var product = await _product.GetProductByIdAsync(item.ProductId);
+                if (product != null)
+                    {
+                    item.Name = product.Name;
+                    item.Price = product.Price;
+                    }
+                }
+
+            return cart;
+            }
+
+
+        public async Task<bool> DeleteProductFromCartAsync(string userId, string productId, int quantity)
+            {
+            return await _cart.DeleteAsync(userId, productId, quantity);
+            }
+
         }
     }
-}

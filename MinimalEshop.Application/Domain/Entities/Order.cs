@@ -17,22 +17,7 @@ namespace MinimalEshop.Application.Domain.Entities
         public string Status { get; set; }
 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
-        public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
-        public List<Product> Products { get; set; } = new List<Product>();
         public PaymentMethod PaymentMethod { get; set; }
     }
 
-    public class OrderStatusInfo : Order
-        {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PaymentMethod PaymentMethod { get; set; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PaymentStatus PaymentStatus { get; set; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public OrderStatus OrderStatus { get; set; }
-        }
-
-
-    }
+}

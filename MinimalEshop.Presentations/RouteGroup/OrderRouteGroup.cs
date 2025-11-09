@@ -27,8 +27,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
-
-            group.MapPost("/paymentprocess", async (ClaimsPrincipal user,[FromBody] PaymentRequest request,OrderService orderService) =>
+            group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService) =>
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -41,8 +40,10 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
                 return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
-            }).RequireAuthorization("UserOrAdmin")
+            })
+            .RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
+
 
             group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService) =>
             {

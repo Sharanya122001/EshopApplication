@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Helper;
 using MinimalEshop.Application.Domain.Enums;
+using MongoDB.Driver;
 
 namespace MinimalEshop.Application.Service
 {
@@ -22,9 +23,10 @@ namespace MinimalEshop.Application.Service
            => await _context.CheckOutAsync(userId);
 
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
-        {
+            {
             return await _context.ProcessPaymentAsync(userId, paymentMethod);
-        }
+            }
+
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
     => await _context.GetOrderDetailsAsync(userId);
 

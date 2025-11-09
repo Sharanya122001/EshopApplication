@@ -8,9 +8,9 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace MinimalEshop.Infrastructure.Repositories
-    {
+{
     public class ProductRepository : IProduct
-        {
+    {
         private readonly IMongoCollection<Product> _products;
 
         public ProductRepository(MongoDbContext context)
@@ -56,8 +56,8 @@ namespace MinimalEshop.Infrastructure.Repositories
             return result.IsAcknowledged && result.DeletedCount > 0;
         }
         public async Task<Product?> GetProductByIdAsync(string productId)
-            {
+        {
             return await _products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
-            }
         }
+    }
 }
