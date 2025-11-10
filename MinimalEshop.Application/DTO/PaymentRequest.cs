@@ -1,5 +1,4 @@
-﻿using MinimalEshop.Application.Domain.Entities;
-using MinimalEshop.Application.Domain.Enums;
+﻿using MinimalEshop.Application.Domain.Enums;
 
 namespace MinimalEshop.Application.DTO
     {

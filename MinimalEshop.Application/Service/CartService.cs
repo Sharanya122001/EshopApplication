@@ -2,14 +2,14 @@
 using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service
-{
-    public class CartService
     {
+    public class CartService
+        {
         private readonly ICart _cart;
         private readonly IProduct _product;
 
         public CartService(ICart cart, IProduct product)
-        {
+            {
             _cart = cart;
             _product = product;
 
@@ -30,7 +30,7 @@ namespace MinimalEshop.Application.Service
                         ProductId = productId,
                          Name = product.Name,
                         Quantity = quantity,
-                        Price = product.Price 
+                        Price = product.Price
                     }
                 }
                 };

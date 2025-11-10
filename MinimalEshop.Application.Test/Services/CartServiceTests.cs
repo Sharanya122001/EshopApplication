@@ -3,10 +3,6 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using Moq;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace MinimalEshop.Application.Test.Services
     {

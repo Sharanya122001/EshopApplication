@@ -1,13 +1,12 @@
 ﻿using MinimalEshop.Application.Domain.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.Text.Json.Serialization;
 
 namespace MinimalEshop.Application.Domain.Entities
-{ 
-    
-    public class Order
     {
+
+    public class Order
+        {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string OrderId { get; set; }
@@ -18,6 +17,6 @@ namespace MinimalEshop.Application.Domain.Entities
 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public PaymentMethod PaymentMethod { get; set; }
-    }
+        }
 
-}
+    }

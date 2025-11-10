@@ -1,20 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using MinimalEshop.Application.Domain.Entities;
-using MinimalEshop.Application.Domain.Enums;
+﻿using Microsoft.AspNetCore.Mvc;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using System.Security.Claims;
 using MinimalEshop.Presentation.Responses;
+using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
-{
-    public static class OrderRouteGroup
     {
-        public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
+    public static class OrderRouteGroup
         {
-            group.MapPost("/checkout", async ( ClaimsPrincipal user,OrderService orderService) =>
+        public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
+            {
+            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService) =>
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -63,7 +59,7 @@ namespace MinimalEshop.Presentation.RouteGroup
 .WithTags("Order");
 
             return group;
-        }
+            }
 
+        }
     }
-}

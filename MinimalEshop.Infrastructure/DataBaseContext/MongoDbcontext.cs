@@ -4,15 +4,15 @@ using MinimalEshop.Infrastructure.Data;
 using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Context
-{
-    public class MongoDbContext
     {
+    public class MongoDbContext
+        {
         private readonly IMongoDatabase _database;
 
         public MongoDbContext(IMongoClient mongoClient, IOptions<MongoDBSettings> settings)
-        {
+            {
             _database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-        }
+            }
 
         public IMongoCollection<Product> Products => _database.GetCollection<Product>("Products");
         public IMongoCollection<Category> Categories => _database.GetCollection<Category>("Categorie");
@@ -20,5 +20,5 @@ namespace MinimalEshop.Infrastructure.Context
         public IMongoCollection<Order> Orders => _database.GetCollection<Order>("Order");
         public IMongoCollection<User> Users => _database.GetCollection<User>("User");
         public IMongoCollection<OrderItem> OrderItems => _database.GetCollection<OrderItem>("OrderItem");
+        }
     }
-}

@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace MinimalEshop.Application.Service
-{
-    public class TokenService : ITokenService
     {
+    public class TokenService : ITokenService
+        {
         private readonly JwtSettings _jwtSettings;
         private readonly byte[] _keyBytes;
         public TokenService(IConfiguration configuration)
@@ -23,9 +21,9 @@ namespace MinimalEshop.Application.Service
                 throw new ArgumentException("JWT Key is missing in configuration.");
 
             _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Key);
-        }
+            }
 
-        public string GenerateToken(string userId,string username, string role)
+        public string GenerateToken(string userId, string username, string role)
             {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(_keyBytes);
@@ -48,6 +46,6 @@ namespace MinimalEshop.Application.Service
             );
 
             return tokenHandler.WriteToken(token);
+            }
         }
     }
-}

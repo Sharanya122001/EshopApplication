@@ -1,10 +1,8 @@
-﻿using Xunit;
-using Moq;
-using System.Threading.Tasks;
-using MinimalEshop.Application.Service;
-using MinimalEshop.Application.Interface;
+﻿using AutoFixture;
 using MinimalEshop.Application.Domain.Enums;
-using AutoFixture;
+using MinimalEshop.Application.Interface;
+using MinimalEshop.Application.Service;
+using Moq;
 
 namespace MinimalEshop.Tests.Service
     {

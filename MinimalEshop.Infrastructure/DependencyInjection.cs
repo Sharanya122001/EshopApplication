@@ -5,11 +5,11 @@ using MinimalEshop.Infrastructure.Data;
 using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure
-{
-    public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static class DependencyInjection
         {
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+            {
             services.Configure<MongoDBSettings>(
                 configuration.GetSection("MongoDBSettings"));
 
@@ -26,7 +26,7 @@ namespace MinimalEshop.Infrastructure
                 return client.GetDatabase(settings.DatabaseName);
             });
 
-            return services; 
+            return services;
+            }
         }
     }
-}

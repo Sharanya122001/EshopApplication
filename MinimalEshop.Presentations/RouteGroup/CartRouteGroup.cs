@@ -1,20 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Mvc;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
-using System.Security.Claims;
 using MinimalEshop.Presentation.Responses;
+using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
-{
-    public static class CartRouteGroup
     {
-        public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
+    public static class CartRouteGroup
         {
-            group.MapPost("/add", async ([FromServices] CartService _service,[FromBody] CartDto cartDto,HttpContext httpContext) =>
+        public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
+            {
+            group.MapPost("/add", async ([FromServices] CartService _service, [FromBody] CartDto cartDto, HttpContext httpContext) =>
             {
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -24,9 +21,9 @@ namespace MinimalEshop.Presentation.RouteGroup
 
 
                 var cart = new Cart
-                {
-                   UserId = userId,
-                   Products = new List<CartItem>
+                    {
+                    UserId = userId,
+                    Products = new List<CartItem>
                    {
                        new CartItem
                        {
@@ -34,7 +31,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                            Quantity = cartDto.Quantity
                        }
                    }
-                };
+                    };
 
                 var created = await _service.AddToCartAsync(
                     cartDto.ProductId,
@@ -49,7 +46,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Cart");
 
-            group.MapDelete("/delete", async ([FromServices] CartService _service,[FromQuery] string productId,[FromQuery] int? quantity,HttpContext httpContext) =>
+            group.MapDelete("/delete", async ([FromServices] CartService _service, [FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext) =>
             {
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -90,7 +87,7 @@ namespace MinimalEshop.Presentation.RouteGroup
               .WithTags("Cart");
 
             return group;
-        }
+            }
 
+        }
     }
-}

@@ -1,9 +1,5 @@
-using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,15 +14,14 @@ using MinimalEshop.Presentation.Responses;
 using MinimalEshop.Presentation.RouteGroup;
 using MongoDB.Driver;
 using System.Text;
-using FluentValidation.AspNetCore;
 
 
 namespace Presentation
-{
-    public class Program
     {
-        public static void Main(string[] args)
+    public class Program
         {
+        public static void Main(string[] args)
+            {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.Configure<JwtSettings>(
@@ -71,12 +66,12 @@ namespace Presentation
                 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
                 if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Key))
-                {
+                    {
                     throw new InvalidOperationException("JWT settings are not configured. Ensure 'Jwt' section exists with a non-empty 'Key'.");
-                }
+                    }
 
                 options.TokenValidationParameters = new TokenValidationParameters
-                {
+                    {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings.Key)
@@ -87,7 +82,7 @@ namespace Presentation
                     ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30)
-                };
+                    };
             });
 
             builder.Services.AddAuthorization(options =>
@@ -100,13 +95,13 @@ namespace Presentation
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
-                {
+                    {
                     Title = "MinimalEshop API",
                     Version = "v1"
-                });
+                    });
 
                 var jwtSecurityScheme = new OpenApiSecurityScheme
-                {
+                    {
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     Name = "Authorization",
@@ -114,11 +109,11 @@ namespace Presentation
                     Type = SecuritySchemeType.Http,
                     Description = "Enter 'Bearer' [space] and then your valid token.",
                     Reference = new OpenApiReference
-                    {
+                        {
                         Id = JwtBearerDefaults.AuthenticationScheme,
                         Type = ReferenceType.SecurityScheme
-                    }
-                };
+                        }
+                    };
 
                 options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -147,10 +142,10 @@ namespace Presentation
             });
 
             if (app.Environment.IsDevelopment())
-            {
+                {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+                }
 
             app.UseHttpsRedirection();
 
@@ -159,15 +154,15 @@ namespace Presentation
                 await next();
 
                 if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-                {
+                    {
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "You are not authorized to access this resource.", StatusCodes.Status403Forbidden));
-                }
+                    }
                 else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                {
+                    {
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized));
-                }
+                    }
             });
 
             app.UseAuthentication();
@@ -180,7 +175,7 @@ namespace Presentation
 
             app.Run();
 
+            }
         }
     }
-}
 

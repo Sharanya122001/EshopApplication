@@ -1,28 +1,20 @@
-﻿using Microsoft.Extensions.Configuration;
-using MinimalEshop.Application.Domain.Entities;
+﻿using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
-using MinimalEshop.Application.Service;
 using MinimalEshop.Infrastructure.Context;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MinimalEshop.Infrastructure.Repositories
-{
-    public class CartRepository : ICart
     {
+    public class CartRepository : ICart
+        {
         private readonly IMongoCollection<Cart> _carts;
 
         public CartRepository(MongoDbContext context)
-        {
-            _carts = context.Carts; 
-        }
+            {
+            _carts = context.Carts;
+            }
         public async Task<bool> AddToCartAsync(Cart cart)
-        {
+            {
             if (cart == null || string.IsNullOrEmpty(cart.UserId) || cart.Products == null || !cart.Products.Any())
                 return false;
 
@@ -37,7 +29,7 @@ namespace MinimalEshop.Infrastructure.Repositories
             );
 
             return true;
-        }
+            }
 
         public async Task<bool> DeleteAsync(string userId, string productId, int quantity)
             {
@@ -70,9 +62,9 @@ namespace MinimalEshop.Infrastructure.Repositories
 
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
-        {
+            {
             return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
-        }
+            }
 
+        }
     }
-}
