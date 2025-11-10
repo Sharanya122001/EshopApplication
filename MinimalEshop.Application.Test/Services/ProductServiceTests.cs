@@ -33,10 +33,10 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task SearchProductsAsync_ReturnsMatchingProducts()
             {
-            var keyword = "Money Plant";
+            var keyword = "Money";
             var fixture = new Fixture();
             var products = fixture.Build<Product>()
-                      .With(p => p.Name, "Laptop")
+                      .With(p => p.Name, "Money Plant")
                       .With(p => p.Price, 1000)
                       .CreateMany(2)
                       .ToList();
