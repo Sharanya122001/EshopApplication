@@ -1,4 +1,5 @@
-﻿using MinimalEshop.Application.Domain.Entities;
+﻿using AutoFixture;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using Moq;
@@ -11,9 +12,11 @@ namespace MinimalEshop.Application.Test.Services
         private readonly UserService _userService;
         private readonly Mock<IUser> _userRepositoryMock;
         private readonly Mock<ITokenService> _tokenServiceMock;
+        private readonly IFixture _fixture;
 
         public UserServiceTests()
             {
+            _fixture = new Fixture();
             _userRepositoryMock = new Mock<IUser>();
             _tokenServiceMock = new Mock<ITokenService>();
 
@@ -23,19 +26,17 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task RegisterUserAsync_ReturnsRegisteredUser()
             {
-            var user = new User
-                {
-                Username = "testuser",
-                Password = "password123",
-                Email = "test@example.com",
-                Role = "Customer"
-                };
+            var user = _fixture.Build<User>()
+                               .With(u => u.Role, "Customer")
+                               .Create();
 
             _userRepositoryMock
                 .Setup(repo => repo.RegisterAsync(It.IsAny<User>()))
                 .ReturnsAsync((User u) => u);
+
             var result = await _userService.RegisterUserAsync(
                 user.Username, user.Password, user.Email, user.Role);
+
             Assert.NotNull(result);
             Assert.Equal(user.Username, result.Username);
             Assert.Equal(user.Email, result.Email);
@@ -47,42 +48,38 @@ namespace MinimalEshop.Application.Test.Services
         [Fact]
         public async Task LoginAsync_WithValidUser_ReturnsToken()
             {
-            var userId = "123";
-            var username = "testuser";
-            var password = "password123";
-            var role = "Customer";
-
-            var user = new User
-            {
-                UserId=userId,
-                Username = username,
-                Password = password,
-                Role = role
-            };
+            var user = _fixture.Build<User>()
+                               .With(u => u.Role, "Customer")
+                               .Create();
 
             _userRepositoryMock
-                .Setup(repo => repo.GetUserByUsernameAsync(username))
+                .Setup(repo => repo.GetUserByUsernameAsync(user.Username))
                 .ReturnsAsync(user);
 
+            var tokenValue = _fixture.Create<string>();
             _tokenServiceMock
-                .Setup(ts => ts.GenerateToken(userId,username, role))
-                .Returns("dummy-token");
+                .Setup(ts => ts.GenerateToken(user.UserId, user.Username, user.Role))
+                .Returns(tokenValue);
 
-            var token = await _userService.LoginAsync(username, password);
+            var token = await _userService.LoginAsync(user.Username, user.Password);
+
             Assert.NotNull(token);
-            Assert.Equal("dummy-token", token);
+            Assert.Equal(tokenValue, token);
 
-            _userRepositoryMock.Verify(repo => repo.GetUserByUsernameAsync(username), Times.Once);
-            _tokenServiceMock.Verify(ts => ts.GenerateToken(userId, username, role), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.GetUserByUsernameAsync(user.Username), Times.Once);
+            _tokenServiceMock.Verify(ts => ts.GenerateToken(user.UserId, user.Username, user.Role), Times.Once);
             }
 
         [Fact]
         public async Task LoginAsync_WithInvalidUser_ReturnsNull()
             {
+            var invalidUsername = _fixture.Create<string>();
+
             _userRepositoryMock
-                .Setup(repo => repo.GetUserByUsernameAsync("invaliduser"))
+                .Setup(repo => repo.GetUserByUsernameAsync(invalidUsername))
                 .ReturnsAsync((User?)null);
-            var token = await _userService.LoginAsync("invaliduser", "password");
+
+            var token = await _userService.LoginAsync(invalidUsername, _fixture.Create<string>());
 
             Assert.Null(token);
             }
