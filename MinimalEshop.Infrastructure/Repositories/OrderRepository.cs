@@ -85,9 +85,12 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             return (true, "Checkout successful. Please choose your payment method.", responseData);
             }
+
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
-            if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.Card)
+            if (paymentMethod < PaymentMethod.UPI)
+                return (false, "None.Please choose the valid PaymentMethod.");
+            if (paymentMethod > PaymentMethod.Card)
                 return (false, "Invalid payment method.");
 
             var order = await _context.Orders

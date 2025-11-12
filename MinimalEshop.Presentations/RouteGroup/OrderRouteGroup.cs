@@ -38,8 +38,15 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
             })
             .RequireAuthorization("UserOrAdmin")
-            .WithTags("Order");
-
+            .WithTags("Order")
+            .WithOpenApi(operation => new(operation)
+                 {
+                 Description = "The payment method:<br>" +
+                  "1 = UPI,<br>" +
+                  "2 = Cash on Delivery,<br>" +
+                  "3 = Card,<br>" +
+                  "4 = NetBanking"
+                 });
 
             group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService) =>
             {

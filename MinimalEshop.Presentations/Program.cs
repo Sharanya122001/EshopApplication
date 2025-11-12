@@ -15,6 +15,7 @@ using MinimalEshop.Presentation.Responses;
 using MinimalEshop.Presentation.RouteGroup;
 using MongoDB.Driver;
 using MongoFramework;
+using System.Reflection;
 using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -102,6 +103,10 @@ namespace Presentation
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                options.IncludeXmlComments(xmlPath);
                 options.SwaggerDoc("v1", new OpenApiInfo
                     {
                     Title = "MinimalEshop API",
