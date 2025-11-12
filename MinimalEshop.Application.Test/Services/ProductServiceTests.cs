@@ -40,6 +40,7 @@ namespace MinimalEshop.Application.Test.Services
                       .With(p => p.Price, 1000)
                       .CreateMany(2)
                       .ToList();
+
             _productRepositoryMock
                 .Setup(repo => repo.SearchAsync(keyword))
                 .ReturnsAsync(products);
@@ -47,9 +48,10 @@ namespace MinimalEshop.Application.Test.Services
             var result = await _productService.SearchProductsAsync(keyword);
 
             Assert.Equal(2, result.Count);
-            Assert.Contains(result, p => p.Name.Contains("Laptop"));
+            Assert.All(result, p => Assert.Contains("Money", p.Name));
             _productRepositoryMock.Verify(repo => repo.SearchAsync(keyword), Times.Once);
             }
+
 
         [Fact]
         public async Task SearchProductsAsync_ReturnsEmptyList_WhenKeywordIsEmpty()
