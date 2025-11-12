@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -13,7 +14,9 @@ using MinimalEshop.Presentation;
 using MinimalEshop.Presentation.Responses;
 using MinimalEshop.Presentation.RouteGroup;
 using MongoDB.Driver;
+using MongoFramework;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 namespace Presentation
@@ -36,7 +39,12 @@ namespace Presentation
                 var settings = s.GetRequiredService<IOptions<MongoDBSettings>>().Value;
                 return new MongoClient(settings.ConnectionString);
             });
-            builder.Services.AddScoped<MongoDbContext>();
+
+            builder.Services.AddDbContext<MinimalEshop.Infrastructure.Context.MongoDbContext>(options =>
+            {
+                options.UseMongoDB("mongodb+srv://Sharanya:Sharanya@cluster0.m2cqpvh.mongodb.net/", "MinimalEshopDB");//usemongo takes 2 arguments one is connectionstring and second is database name
+            });
+
             builder.Services.AddScoped<IUser, UserRepository>();
             builder.Services.AddScoped<IProduct, ProductRepository>();
             builder.Services.AddScoped<IOrder, OrderRepository>();

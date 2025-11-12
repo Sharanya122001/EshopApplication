@@ -1,23 +1,23 @@
-﻿using MinimalEshop.Application.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace MinimalEshop.Infrastructure.Repositories
     {
     public class ProductRepository : IProduct
         {
-        private readonly IMongoCollection<Product> _products;
+        private readonly MongoDbContext _context;
 
         public ProductRepository(MongoDbContext context)
             {
-            _products = context.Products;
+            _context = context;
             }
 
         public async Task<List<Product>> GetAllAsync()
             {
-            return await _products.Find(_ => true).ToListAsync();
+            return await _context.Products.ToListAsync();
             }
 
         public async Task<List<Product>> SearchAsync(string keyword)
@@ -25,36 +25,48 @@ namespace MinimalEshop.Infrastructure.Repositories
             if (string.IsNullOrWhiteSpace(keyword))
                 return new List<Product>();
 
-            var filter = Builders<Product>.Filter.Regex(
-                p => p.Name,
-                new MongoDB.Bson.BsonRegularExpression(keyword, "i"));
-            return await _products.Find(filter).ToListAsync();
-            }
+            return await _context.Products
+                 .Where(p => p.Name.ToLower().Contains(keyword.ToLower()))
+                 .ToListAsync();
+        }
 
 
         public async Task<Product> AddAsync(Product product)
             {
-            await _products.InsertOneAsync(product);
+            await _context.AddAsync(product);
+            await _context.SaveChangesAsync();
             return product;
             }
 
         public async Task<bool> UpdateAsync(Product product)
             {
-            var result = await _products.ReplaceOneAsync(
-                p => p.ProductId == product.ProductId,
-                product);
+            var existingProduct = await _context.Products
+            .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
 
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            if (existingProduct == null)
+                return false;
+
+            _context.Entry(existingProduct).CurrentValues.SetValues(product);
+            await _context.SaveChangesAsync();
+
+            return true;
             }
 
         public async Task<bool> DeleteAsync(string ProductId)
             {
-            var result = await _products.DeleteOneAsync(p => p.ProductId == ProductId);
-            return result.IsAcknowledged && result.DeletedCount > 0;
+            var product = await _context.Products
+            .FirstOrDefaultAsync(p => p.ProductId == ProductId);
+
+            if (product == null)
+                return false;
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return true;
             }
         public async Task<Product?> GetProductByIdAsync(string productId)
             {
-            return await _products.Find(p => p.ProductId == productId).FirstOrDefaultAsync();
+            return await _context.Products.Where(p => p.ProductId == productId).FirstOrDefaultAsync();
             }
         }
     }

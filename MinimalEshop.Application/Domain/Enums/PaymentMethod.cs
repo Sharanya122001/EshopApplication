@@ -2,7 +2,7 @@
     {
     public enum PaymentMethod
         {
-        Null = 0,
+        None = 0,
         UPI = 1,
         CashOnDelivery = 2,
         NetBanking = 3,

@@ -9,24 +9,22 @@ namespace MinimalEshop.Infrastructure.Repositories
     {
     public class OrderRepository : IOrder
         {
-        private readonly IMongoCollection<Cart> _cart;
-        private readonly IMongoCollection<Order> _order;
-        private readonly IMongoCollection<OrderItem> _orderItem;
-
+        private readonly MongoDbContext _context;
         public OrderRepository(MongoDbContext context)
             {
-            _cart = context.Carts;
-            _order = context.Orders;
-            _orderItem = context.OrderItems;
+            _context = context;
             }
         public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
             {
-            var cartList = await _cart.Find(c => c.UserId == userId).ToListAsync();
+            var cartItems = await _context.Carts
+                .Where(c => c.UserId == userId)
+                .Include(c => c.Products)
+                .ToListAsync();
 
-            if (cartList == null || !cartList.Any())
+            if (cartItems == null || !cartItems.Any())
                 return (false, "Your cart is empty. Please add items before checkout.", null);
 
-            var totalAmount = cartList.Sum(c =>
+            var totalAmount = cartItems.Sum(c =>
                 (c.Products ?? new List<CartItem>())
                 .Sum(p => p.Price * p.Quantity)
             );
@@ -34,16 +32,18 @@ namespace MinimalEshop.Infrastructure.Repositories
             var order = new Order
                 {
                 UserId = userId,
+                Name = "Checkout Order",
                 OrderDate = DateTime.UtcNow,
                 TotalAmount = totalAmount,
                 Status = "Pending"
                 };
 
-            await _order.InsertOneAsync(order);
+            await _context.Orders.AddAsync(order);
+            await _context.SaveChangesAsync(); 
 
             var orderItems = new List<OrderItem>();
 
-            foreach (var cart in cartList)
+            foreach (var cart in cartItems)
                 {
                 foreach (var product in cart.Products ?? new List<CartItem>())
                     {
@@ -51,7 +51,7 @@ namespace MinimalEshop.Infrastructure.Repositories
                         {
                         OrderId = order.OrderId,
                         ProductId = product.ProductId,
-                        Name = product.Name,
+                        Name = string.IsNullOrEmpty(product.Name) ? "Unknown Product" : product.Name,
                         Quantity = product.Quantity,
                         Price = product.Price
                         });
@@ -59,9 +59,13 @@ namespace MinimalEshop.Infrastructure.Repositories
                 }
 
             if (orderItems.Any())
-                await _orderItem.InsertManyAsync(orderItems);
+                {
+                await _context.OrderItems.AddRangeAsync(orderItems);
+                await _context.SaveChangesAsync();
+                }
 
-            await _cart.DeleteManyAsync(c => c.UserId == userId);
+            _context.Carts.RemoveRange(cartItems);
+            await _context.SaveChangesAsync();
 
             var responseData = new
                 {
@@ -81,16 +85,14 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             return (true, "Checkout successful. Please choose your payment method.", responseData);
             }
-
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
-
             if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.Card)
                 return (false, "Invalid payment method.");
 
-            var order = await _order
-                .Find(o => o.UserId == userId)
-                .SortByDescending(o => o.OrderDate)
+            var order = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
                 .FirstOrDefaultAsync();
 
             if (order == null)
@@ -99,47 +101,39 @@ namespace MinimalEshop.Infrastructure.Repositories
             if (order.Status == "Completed")
                 return (false, "Payment is already done.");
 
-            var updatePaymentMethod = Builders<Order>.Update
-                .Set(o => o.PaymentMethod, paymentMethod);
-            await _order.UpdateOneAsync(o => o.OrderId == order.OrderId, updatePaymentMethod);
+            order.PaymentMethod = paymentMethod;
 
-            PaymentStatus status = paymentMethod switch
+            if (paymentMethod == PaymentMethod.CashOnDelivery)
                 {
-                    PaymentMethod.CashOnDelivery => PaymentStatus.Pending,
-                    PaymentMethod.UPI or PaymentMethod.NetBanking or PaymentMethod.Card => PaymentStatus.Success,
-                    _ => PaymentStatus.Failed
-                    };
+                order.PaymentStatus = PaymentStatus.Pending;
+                order.Status = "Pending";
+                }
+            else
+                {
+                order.PaymentStatus = PaymentStatus.Success;
+                order.Status = "Completed";
+                }
 
-            order.PaymentStatus = status;
-            await _order.UpdateOneAsync(
-                o => o.OrderId == order.OrderId,
-                Builders<Order>.Update.Set(o => o.PaymentStatus, status)
-            );
-
-            var updatedStatus = status == PaymentStatus.Success ? "Completed"
-                               : status == PaymentStatus.Pending ? "Pending"
-                               : "Failed";
-
-            var updateStatus = Builders<Order>.Update
-                .Set(o => o.Status, updatedStatus);
-            await _order.UpdateOneAsync(o => o.OrderId == order.OrderId, updateStatus);
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
 
             var message = $"Payment processed successfully using: {paymentMethod}";
             return (true, message);
             }
 
+
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
             {
-            var order = await _order
-                .Find(o => o.UserId == userId)
-                .SortByDescending(o => o.OrderDate)
+            var order = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
                 .FirstOrDefaultAsync();
 
             if (order == null)
                 return (false, "No orders found for this user.", null);
 
-            var orderItems = await _orderItem
-                .Find(oi => oi.OrderId == order.OrderId)
+            var orderItems = await _context.OrderItems
+                .Where(oi => oi.OrderId == order.OrderId)
                 .ToListAsync();
 
             var responseData = new
@@ -157,11 +151,12 @@ namespace MinimalEshop.Infrastructure.Repositories
                     i.Name,
                     i.Quantity,
                     i.Price
-                    })
+                    }).ToList()
                 };
 
             return (true, "Order details fetched successfully.", responseData);
             }
+
 
 
         }

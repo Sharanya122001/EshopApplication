@@ -1,4 +1,5 @@
-﻿using MinimalEshop.Application.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;
 using MongoDB.Driver;
@@ -7,33 +8,43 @@ namespace MinimalEshop.Infrastructure.Repositories
     {
     public class CartRepository : ICart
         {
-        private readonly IMongoCollection<Cart> _carts;
+        private readonly MongoDbContext _context;
 
         public CartRepository(MongoDbContext context)
             {
-            _carts = context.Carts;
+            _context = context;
             }
         public async Task<bool> AddToCartAsync(Cart cart)
             {
             if (cart == null || string.IsNullOrEmpty(cart.UserId) || cart.Products == null || !cart.Products.Any())
                 return false;
 
-            var cartItem = cart.Products.First();
-            var update = Builders<Cart>.Update.Push(c => c.Products, cartItem);
+            var existingCart = await _context.Carts
+                .Include(c => c.Products)
+                .FirstOrDefaultAsync(c => c.UserId == cart.UserId);
 
-            await _carts.UpdateOneAsync
-            (
-                c => c.UserId == cart.UserId,
-                update,
-                new UpdateOptions { IsUpsert = true }
-            );
+            if (existingCart == null)
+                {
+                await _context.Carts.AddAsync(cart);
+                }
+            else
+                {
+                var newProduct = cart.Products.First();
 
+                existingCart.Products.Add(newProduct);
+                _context.Carts.Update(existingCart);
+                }
+
+            await _context.SaveChangesAsync();
             return true;
             }
 
         public async Task<bool> DeleteAsync(string userId, string productId, int quantity)
             {
-            var cart = await _carts.Find(c => c.UserId == userId).FirstOrDefaultAsync();
+            var cart = await _context.Carts
+             .Include(c => c.Products)
+             .FirstOrDefaultAsync(c => c.UserId == userId);
+
             if (cart == null) return false;
 
             var product = cart.Products.FirstOrDefault(p => p.ProductId == productId);
@@ -41,21 +52,15 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             if (quantity >= product.Quantity)
                 {
-                var update = Builders<Cart>.Update.PullFilter(
-                    c => c.Products,
-                    p => p.ProductId == productId
-                );
-
-                await _carts.UpdateOneAsync(c => c.UserId == userId, update);
+                cart.Products.Remove(product);
                 }
             else
                 {
-                var update = Builders<Cart>.Update.Inc("Products.$.Quantity", -quantity);
-                await _carts.UpdateOneAsync(
-                    c => c.UserId == userId && c.Products.Any(p => p.ProductId == productId),
-                    update
-                );
+                product.Quantity -= quantity;
                 }
+
+            _context.Carts.Update(cart);
+            await _context.SaveChangesAsync();
 
             return true;
             }
@@ -63,7 +68,7 @@ namespace MinimalEshop.Infrastructure.Repositories
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
             {
-            return await _carts.Find(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
+            return await _context.Carts.Where(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
             }
 
         }
