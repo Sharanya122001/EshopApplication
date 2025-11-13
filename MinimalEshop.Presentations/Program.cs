@@ -61,6 +61,9 @@ namespace Presentation
               .AddFluentValidation(fv =>
               {
                   fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>();
+                  fv.RegisterValidatorsFromAssemblyContaining<LoginDtoValidation>();
+                  fv.RegisterValidatorsFromAssemblyContaining<ProductDtoValidator>();
+                  fv.RegisterValidatorsFromAssemblyContaining<CartDtoValidator>();
               });
 
             builder.Services.AddScoped<ITokenService, TokenService>();

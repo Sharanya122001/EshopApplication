@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
@@ -11,8 +13,14 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/add", async ([FromServices] CartService _service, [FromBody] CartDto cartDto, HttpContext httpContext) =>
+            group.MapPost("/add", async ([FromServices] CartService _service, [FromServices] IValidator<CartDto> validator,[FromBody] CartDto cartDto, HttpContext httpContext) =>
             {
+                var validationResult = await validator.ValidateAsync(cartDto);
+                if (!validationResult.IsValid)
+                    {
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
+                    }
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -46,8 +54,21 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Cart");
 
-            group.MapDelete("/delete", async ([FromServices] CartService _service, [FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext) =>
+            group.MapDelete("/delete", async ([FromServices] CartService _service,[FromServices] IValidator <CartDto> validator,[FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext) =>
             {
+
+                var dto = new CartDto
+                    {
+                    ProductId = productId,
+                    Quantity = quantity ?? 1
+                    };
+                var validationResult = await validator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                    {
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
+                    }
+
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

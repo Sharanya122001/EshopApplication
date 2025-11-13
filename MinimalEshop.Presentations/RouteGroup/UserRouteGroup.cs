@@ -4,6 +4,7 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
+using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Presentation.RouteGroup
     {
@@ -38,10 +39,17 @@ namespace MinimalEshop.Presentation.RouteGroup
             })
             .WithTags("User");
 
-            group.MapPost("/Login", async ([FromServices] UserService _service, [FromBody] LoginDto loginDto) =>
+            group.MapPost("/Login", async ([FromServices] UserService _service, [FromServices] IValidator <LoginDto> validator,[FromBody] LoginDto loginDto) =>
             {
                 if (loginDto == null)
                     return Results.BadRequest(Result.Fail(null, "Invalid request body.", StatusCodes.Status400BadRequest));
+
+                var validationResult = await validator.ValidateAsync(loginDto);
+                if (!validationResult.IsValid)
+                    {
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
+                    }
 
                 var token = await _service.LoginAsync(loginDto.Username, loginDto.Password);
 

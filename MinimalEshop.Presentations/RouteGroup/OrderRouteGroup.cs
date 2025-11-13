@@ -39,8 +39,8 @@ namespace MinimalEshop.Presentation.RouteGroup
             })
             .RequireAuthorization("UserOrAdmin")
             .WithTags("Order")
-            .WithOpenApi(operation => new(operation)
-                 {
+            .WithOpenApi(operation => new(operation)//this .WithOpenApi must be used in the minimalapi but not in the controller
+                {
                  Description = "The payment method:<br>" +
                   "1 = UPI,<br>" +
                   "2 = Cash on Delivery,<br>" +
@@ -62,8 +62,8 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             })
-.RequireAuthorization("UserOrAdmin")
-.WithTags("Order");
+            .RequireAuthorization("UserOrAdmin")
+            .WithTags("Order");
 
             return group;
             }

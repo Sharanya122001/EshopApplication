@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
+using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Presentation.RouteGroup
     {
@@ -15,7 +17,8 @@ namespace MinimalEshop.Presentation.RouteGroup
             {
                 var product = await _service.GetProductAsync();
                 return Results.Ok(Result.Ok(product, null, StatusCodes.Status200OK));
-            }).RequireAuthorization("UserOrAdmin")
+            })
+            .RequireAuthorization("UserOrAdmin")
             .WithTags("Product");
 
             group.MapGet("/search", async ([FromServices] ProductService _service, [FromQuery] string query) =>
@@ -60,8 +63,18 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 
-            group.MapDelete("/delete", async ([FromServices] ProductService _service, [FromQuery] string ProductId) =>
+            group.MapDelete("/delete", async ([FromServices] ProductService _service,[FromServices] IValidator<ProductDto> validator, [FromQuery] string ProductId) =>
             {
+                var dto = new ProductDto
+                    {
+                    ProductId = ProductId
+                    };
+                var validationResult = await validator.ValidateAsync(dto);
+                if (!validationResult.IsValid)
+                    {
+                    var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
+                    }
                 var deleted = await _service.DeleteProductAsync(ProductId);
                 return Results.Ok(Result.Ok(deleted, deleted ? "Product deleted" : "Product delete failed", StatusCodes.Status200OK));
             }).RequireAuthorization("AdminOnly")
