@@ -30,6 +30,14 @@ namespace Presentation
             {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Host.UseSerilog((context, services, loggerConfig) =>
+            {
+                loggerConfig
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext();
+            });
+
             builder.Services.Configure<JwtSettings>(
                 builder.Configuration.GetSection("Jwt")
             );
@@ -138,15 +146,6 @@ namespace Presentation
                 {
                    { jwtSecurityScheme, Array.Empty<string>() }
                 });
-            });
-
-
-            builder.Host.UseSerilog((context, services, Configuration) =>
-            {
-                Configuration.ReadFrom.Configuration(context.Configuration)
-                .ReadFrom.Services(services)
-                .WriteTo.Console()
-                .WriteTo.Debug();
             });
 
             var app = builder.Build();
