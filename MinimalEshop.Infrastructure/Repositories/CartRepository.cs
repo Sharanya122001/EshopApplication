@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;

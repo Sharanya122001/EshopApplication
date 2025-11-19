@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="MongoDB.EntityFrameworkCore" Version="9.0.3" />
     <PackageReference Include="MongoFramework" Version="0.29.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
@@ -26,6 +27,10 @@
   <ItemGroup>
     <ProjectReference Include="..\MinimalEshop.Application\MinimalEshop.Application.csproj" />
     <ProjectReference Include="..\MinimalEshop.Infrastructure\MinimalEshop.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="logs\" />
   </ItemGroup>
 
 </Project>

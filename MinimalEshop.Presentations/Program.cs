@@ -18,6 +18,8 @@ using MongoFramework;
 using System.Reflection;
 using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Serilog;
+using Serilog.AspNetCore;
 
 
 namespace Presentation
@@ -138,6 +140,15 @@ namespace Presentation
                 });
             });
 
+
+            builder.Host.UseSerilog((context, services, Configuration) =>
+            {
+                Configuration.ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .WriteTo.Console()
+                .WriteTo.Debug();
+            });
+
             var app = builder.Build();
 
             // Global exception handler
@@ -150,6 +161,11 @@ namespace Presentation
                     var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
                     var ex = feature?.Error;
 
+                    //added logging
+                    Log.Error(ex,
+                        "Unhandled exception occurred at path: {Path}. Message: {Message}",
+                        feature?.Path,
+                        ex?.Message);
                     var result = Result.Fail(new[] { ex?.Message ?? "An unexpected error occurred." }, "An error occurred while processing your request.", 500);
 
                     context.Response.StatusCode = 500;
@@ -168,19 +184,30 @@ namespace Presentation
             app.Use(async (context, next) =>
             {
                 await next();
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
                 if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
                     {
+
+                    logger.LogWarning("Forbidden (403): User tried to access {Path} but does not have permission.",
+                       context.Request.Path);
+
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "You are not authorized to access this resource.", StatusCodes.Status403Forbidden));
                     }
+
                 else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
                     {
+
+                    logger.LogWarning("Unauthorized (401): User attempted to access {Path} without authentication.",
+                       context.Request.Path);
+
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized));
                     }
             });
 
+            app.UseSerilogRequestLogging();
             app.UseAuthentication();
             app.UseAuthorization();
 

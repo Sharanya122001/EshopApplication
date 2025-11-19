@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
@@ -10,8 +11,11 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService) =>
+            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService, ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger("OrderRouteLogger");
+                logger.LogInformation("POST/ CheckoutProduct");
+
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 var (success, message, data) = await orderService.CheckOutAsync(userId);
@@ -19,12 +23,17 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (!success)
                     return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
+                logger.LogInformation("Checkout Products");
+
                 return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
-            group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService) =>
+            group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService, ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger("OrderRouteLogger");
+                logger.LogInformation("POST/ Payment Process");
+
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (string.IsNullOrEmpty(userId))
@@ -35,21 +44,26 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (!success)
                     return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
+                logger.LogInformation("Payment Process selected");
+
                 return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
             })
             .RequireAuthorization("UserOrAdmin")
             .WithTags("Order")
             .WithOpenApi(operation => new(operation)//this .WithOpenApi must be used in the minimalapi but not in the controller
                 {
-                 Description = "The payment method:<br>" +
+                Description = "The payment method:<br>" +
                   "1 = UPI,<br>" +
                   "2 = Cash on Delivery,<br>" +
                   "3 = Card,<br>" +
                   "4 = NetBanking"
-                 });
+                });
 
-            group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService) =>
+            group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService, ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger("OrderRouteLogger");
+                logger.LogInformation("GET/ Getting Order details");
+
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 if (string.IsNullOrEmpty(userId))
@@ -60,6 +74,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (!success)
                     return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
 
+                logger.LogInformation("Retrieved Order details");
+
                 return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             })
             .RequireAuthorization("UserOrAdmin")
@@ -67,6 +83,5 @@ namespace MinimalEshop.Presentation.RouteGroup
 
             return group;
             }
-
         }
     }
