@@ -87,7 +87,37 @@ namespace MinimalEshop.Application.Service
             }
 
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
-    => await _context.GetOrderDetailsAsync(userId);
+            {
+            if (string.IsNullOrWhiteSpace(userId))
+                return (false, "Invalid UserId.", null);
+
+            var order = await _context.GetLatestOrderAsync(userId);
+
+            if (order == null)
+                return (false, "No orders found for this user.", null);
+
+            var items = await _context.GetOrderItemsAsync(order.OrderId);
+
+            var response = new
+                {
+                order.OrderId,
+                order.UserId,
+                order.OrderDate,
+                order.TotalAmount,
+                order.Status,
+                PaymentMethod = order.PaymentMethod.ToString(),
+                PaymentStatus = order.PaymentStatus.ToString(),
+                Items = items.Select(i => new
+                    {
+                    i.ProductId,
+                    i.Name,
+                    i.Quantity,
+                    i.Price
+                    }).ToList()
+                };
+
+            return (true, "Order details fetched successfully.", response);
+            }
 
         }
     }

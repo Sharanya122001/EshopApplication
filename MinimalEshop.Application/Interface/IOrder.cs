@@ -13,7 +13,8 @@ namespace MinimalEshop.Application.Interface
         Task ClearCartAsync(List<Cart> carts);
         Task<Order?> GetLatestOrderAsync(string userId);
         Task UpdateOrderAsync(Order order);
-        Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId);
+        //Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId);
+        Task<List<OrderItem>> GetOrderItemsAsync(string orderId);
 
 
         }

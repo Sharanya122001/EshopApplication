@@ -11,7 +11,7 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService) =>
+            group.MapPost("/checkout", async (ClaimsPrincipal user, [FromServices] OrderService orderService) =>
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -59,8 +59,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                      "4 = NetBanking"
                      });
 
-
-            group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService, ILoggerFactory loggerFactory) =>
+            group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("OrderRouteLogger");
                 logger.LogInformation("GET/ Getting Order details");

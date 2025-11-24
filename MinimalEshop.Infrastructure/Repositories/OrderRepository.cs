@@ -47,40 +47,11 @@ namespace MinimalEshop.Infrastructure.Repositories
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
             }
-
-        public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
+        public async Task<List<OrderItem>> GetOrderItemsAsync(string orderId)
             {
-            var order = await _context.Orders
-                .Where(o => o.UserId == userId)
-                .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefaultAsync();
-
-            if (order == null)
-                return (false, "No orders found for this user.", null);
-
-            var orderItems = await _context.OrderItems
-                .Where(oi => oi.OrderId == order.OrderId)
+            return await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
                 .ToListAsync();
-
-            var responseData = new
-                {
-                order.OrderId,
-                order.UserId,
-                order.OrderDate,
-                order.TotalAmount,
-                order.Status,
-                PaymentMethod = order.PaymentMethod.ToString(),
-                PaymentStatus = order.PaymentStatus.ToString(),
-                Items = orderItems.Select(i => new
-                    {
-                    i.ProductId,
-                    i.Name,
-                    i.Quantity,
-                    i.Price
-                    }).ToList()
-                };
-
-            return (true, "Order details fetched successfully.", responseData);
             }
 
         }
