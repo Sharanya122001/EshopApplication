@@ -11,9 +11,8 @@ namespace MinimalEshop.Application.Interface
 
         Task<List<Cart>> GetUserCartAsync(string userId);
         Task ClearCartAsync(List<Cart> carts);
-
-        //Task<(bool success, string message, object data)> CheckOutAsync(string userId);
-        Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod);
+        Task<Order?> GetLatestOrderAsync(string userId);
+        Task UpdateOrderAsync(Order order);
         Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId);
 
 

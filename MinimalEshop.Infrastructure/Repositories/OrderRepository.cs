@@ -34,45 +34,19 @@ namespace MinimalEshop.Infrastructure.Repositories
             _context.Carts.RemoveRange(carts);
             await _context.SaveChangesAsync();
             }
-
-        public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
+        public async Task<Order?> GetLatestOrderAsync(string userId)
             {
-            if (paymentMethod < PaymentMethod.UPI)
-                return (false, "None.Please choose the valid PaymentMethod.");
-            if (paymentMethod > PaymentMethod.Card)
-                return (false, "Invalid payment method.");
-
-            var order = await _context.Orders
+            return await _context.Orders
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .FirstOrDefaultAsync();
-
-            if (order == null)
-                return (false, "Checkout is pending. Please complete checkout before making payment.");
-
-            if (order.Status == "Completed")
-                return (false, "Payment is already done.");
-
-            order.PaymentMethod = paymentMethod;
-
-            if (paymentMethod == PaymentMethod.CashOnDelivery)
-                {
-                order.PaymentStatus = PaymentStatus.Pending;
-                order.Status = "Pending";
-                }
-            else
-                {
-                order.PaymentStatus = PaymentStatus.Success;
-                order.Status = "Completed";
-                }
-
-            _context.Orders.Update(order);
-            await _context.SaveChangesAsync();
-
-            var message = $"Payment processed successfully using: {paymentMethod}";
-            return (true, message);
             }
 
+        public async Task UpdateOrderAsync(Order order)
+            {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+            }
 
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)
             {

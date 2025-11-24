@@ -67,10 +67,23 @@ namespace MinimalEshop.Application.Service
 
             return Result<object>.Ok(response, "Checkout successful", 200);
             }
-
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
-            return await _context.ProcessPaymentAsync(userId, paymentMethod);
+            if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.NetBanking)
+                return (false, "Invalid payment method. Please choose a valid one.");
+
+            var order = await _context.GetLatestOrderAsync(userId);
+            if (order == null)
+                return (false, "Checkout is pending. Please complete checkout before making payment.");
+
+            if (order.Status == "Completed")
+                return (false, "Payment is already done.");
+
+            order.ProcessPayment(paymentMethod);
+
+            await _context.UpdateOrderAsync(order);
+
+            return (true, $"Payment processed successfully using: {paymentMethod}");
             }
 
         public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)

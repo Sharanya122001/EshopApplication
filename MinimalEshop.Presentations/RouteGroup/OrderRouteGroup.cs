@@ -25,36 +25,40 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
-
             group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("OrderRouteLogger");
-                logger.LogInformation("POST/ Payment Process");
+                logger.LogInformation("POST /paymentprocess called");
 
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
                 if (string.IsNullOrEmpty(userId))
                     return Results.Unauthorized();
 
                 var (success, message) = await orderService.ProcessPaymentAsync(userId, request.PaymentProcess);
 
                 if (!success)
+                    {
+                    logger.LogWarning("Payment failed: {Message}", message);
                     return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
+                    }
 
-                logger.LogInformation("Payment Process selected");
+                logger.LogInformation("Payment successful with method {Method}", request.PaymentProcess);
 
                 return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
+
             })
             .RequireAuthorization("UserOrAdmin")
             .WithTags("Order")
-            .WithOpenApi(operation => new(operation)//this .WithOpenApi must be used in the minimalapi but not in the controller
-                {
-                Description = "The payment method:<br>" +
-                  "1 = UPI,<br>" +
-                  "2 = Cash on Delivery,<br>" +
-                  "3 = Card,<br>" +
-                  "4 = NetBanking"
-                });
+            .WithOpenApi(operation => new(operation)
+                    {
+                     Description =
+                     "Payment Method Values:<br>" +
+                     "1 = UPI,<br>" +
+                     "2 = Cash on Delivery,<br>" +
+                     "3 = Card,<br>" +
+                     "4 = NetBanking"
+                     });
+
 
             group.MapGet("/details", async (ClaimsPrincipal user, OrderService orderService, ILoggerFactory loggerFactory) =>
             {
