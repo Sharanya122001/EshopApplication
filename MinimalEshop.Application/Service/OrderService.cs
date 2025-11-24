@@ -1,5 +1,6 @@
 ﻿using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Domain.Enums;
+using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Presentation.Responses;
 
@@ -49,23 +50,23 @@ namespace MinimalEshop.Application.Service
 
             await _context.ClearCartAsync(carts);
 
-            var response = new
+            var orderDto = new OrderDto
                 {
-                order.OrderId,
-                order.UserId,
-                order.OrderDate,
-                order.TotalAmount,
-                order.Status,
-                Items = orderItems.Select(i => new
+                OrderId = order.OrderId,
+                UserId = order.UserId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                Status = order.Status,
+                Items = orderItems.Select(i => new OrderItemDto
                     {
-                    i.ProductId,
-                    i.Name,
-                    i.Quantity,
-                    i.Price
-                    })
+                    ProductId = i.ProductId,
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Price = i.Price
+                    }).ToList()
                 };
 
-            return Result<object>.Ok(response, "Checkout successful", 200);
+            return Result<object>.Ok(orderDto, "Checkout successful", 200);
             }
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
@@ -98,25 +99,25 @@ namespace MinimalEshop.Application.Service
 
             var items = await _context.GetOrderItemsAsync(order.OrderId);
 
-            var response = new
+            var orderDto = new OrderDto
                 {
-                order.OrderId,
-                order.UserId,
-                order.OrderDate,
-                order.TotalAmount,
-                order.Status,
+                OrderId = order.OrderId,
+                UserId = order.UserId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                Status = order.Status,
                 PaymentMethod = order.PaymentMethod.ToString(),
                 PaymentStatus = order.PaymentStatus.ToString(),
-                Items = items.Select(i => new
+                Items = items.Select(i => new OrderItemDto
                     {
-                    i.ProductId,
-                    i.Name,
-                    i.Quantity,
-                    i.Price
+                    ProductId = i.ProductId,
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Price = i.Price
                     }).ToList()
                 };
 
-            return (true, "Order details fetched successfully.", response);
+            return (true, "Order details fetched successfully.", orderDto);
             }
 
         }
