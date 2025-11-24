@@ -19,6 +19,8 @@ namespace MinimalEshop.Application.Service
             }
         public async Task<List<Product>> SearchProductsAsync(string keyword)
             {
+            if (string.IsNullOrWhiteSpace(keyword))
+                throw new Exception("Keyword cannot be empty");
             return await _product.SearchAsync(keyword);
             }
 

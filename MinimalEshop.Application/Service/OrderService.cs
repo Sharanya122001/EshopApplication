@@ -1,5 +1,8 @@
-﻿using MinimalEshop.Application.Domain.Enums;
+﻿using MinimalEshop.Application.Domain.Entities;
+using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.Interface;
+using MinimalEshop.Presentation.Responses;
+
 
 namespace MinimalEshop.Application.Service
     {
@@ -10,9 +13,60 @@ namespace MinimalEshop.Application.Service
             {
             _context = context;
             }
+        public async Task<Result<object>> CheckOutAsync(string userId)
+            {
+            if (string.IsNullOrEmpty(userId))
+                return Result<object>.Fail(null, "User not logged in", 401);
 
-        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
-           => await _context.CheckOutAsync(userId);
+            var carts = await _context.GetUserCartAsync(userId);
+
+            if (carts == null || !carts.Any())
+                return Result<object>.Fail(null, "Your cart is empty", 400);
+
+            var totalAmount = carts.Sum(c => c.GetTotalPrice());
+
+            var order = new Order
+                {
+                UserId = userId,
+                Name = "Checkout Order",
+                OrderDate = DateTime.UtcNow,
+                TotalAmount = totalAmount,
+                Status = "Pending"
+                };
+
+            var orderItems = carts
+                .SelectMany(c => c.Products)
+                .Select(p => new OrderItem
+                    {
+                    ProductId = p.ProductId,
+                    Name = string.IsNullOrEmpty(p.Name) ? "Unknown Product" : p.Name,
+                    Quantity = p.Quantity,
+                    Price = p.Price
+                    })
+                .ToList();
+
+            await _context.SaveOrderAsync(order, orderItems);
+
+            await _context.ClearCartAsync(carts);
+
+            var response = new
+                {
+                order.OrderId,
+                order.UserId,
+                order.OrderDate,
+                order.TotalAmount,
+                order.Status,
+                Items = orderItems.Select(i => new
+                    {
+                    i.ProductId,
+                    i.Name,
+                    i.Quantity,
+                    i.Price
+                    })
+                };
+
+            return Result<object>.Ok(response, "Checkout successful", 200);
+            }
 
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {

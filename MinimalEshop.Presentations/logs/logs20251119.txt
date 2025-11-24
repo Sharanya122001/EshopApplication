@@ -1553,3 +1553,125 @@ MinimalEshopDB.User.aggregate([?])
 2025-11-19 15:22:17.109 +05:30 [DBG] Connection ID "18374686497656799325" disconnecting.
 2025-11-19 15:22:17.115 +05:30 [DBG] 'MongoDbContext' disposed.
 2025-11-19 15:22:17.119 +05:30 [INF] Request finished HTTP/2 POST https://localhost:44310/users/Login - 200 null application/json; charset=utf-8 1632.5783ms
+2025-11-19 15:45:27.723 +05:30 [DBG] Hosting starting
+2025-11-19 15:45:27.940 +05:30 [INF] User profile is available. Using 'C:\Users\sagnihotri\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-19 15:45:27.973 +05:30 [DBG] Reading data from file 'C:\Users\sagnihotri\AppData\Local\ASP.NET\DataProtection-Keys\key-a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1.xml'.
+2025-11-19 15:45:28.087 +05:30 [DBG] Found key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1}.
+2025-11-19 15:45:28.120 +05:30 [DBG] Considering key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} with expiration date 2025-12-28 06:56:43Z as default key.
+2025-11-19 15:45:28.175 +05:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-11-19 15:45:28.180 +05:30 [DBG] Decrypting secret element using Windows DPAPI.
+2025-11-19 15:45:28.191 +05:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-11-19 15:45:28.248 +05:30 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2025-11-19 15:45:28.279 +05:30 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2025-11-19 15:45:28.288 +05:30 [DBG] Using key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} as the default key.
+2025-11-19 15:45:28.297 +05:30 [DBG] Key ring with default key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} was loaded during application startup.
+2025-11-19 15:45:28.347 +05:30 [DBG] Middleware loaded
+2025-11-19 15:45:28.361 +05:30 [DBG] Middleware loaded. Script /_framework/aspnetcore-browser-refresh.js (16537 B).
+2025-11-19 15:45:28.401 +05:30 [DBG] Middleware loaded. Script /_framework/blazor-hotreload.js (799 B).
+2025-11-19 15:45:28.870 +05:30 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2025-11-19 15:45:28.880 +05:30 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-11-19 15:45:28.886 +05:30 [DBG] Middleware loaded: DOTNET_MODIFIABLE_ASSEMBLIES=debug, __ASPNETCORE_BROWSER_TOOLS=true
+2025-11-19 15:45:28.892 +05:30 [DBG] Loaded hosting startup assembly MinimalEshop.Presentations
+2025-11-19 15:45:28.935 +05:30 [DBG] Loaded hosting startup assembly Microsoft.WebTools.ApiEndpointDiscovery
+2025-11-19 15:45:28.938 +05:30 [DBG] Loaded hosting startup assembly Microsoft.AspNetCore.Watch.BrowserRefresh
+2025-11-19 15:45:28.940 +05:30 [DBG] Loaded hosting startup assembly Microsoft.WebTools.BrowserLink.Net
+2025-11-19 15:45:28.997 +05:30 [DBG] Connection ID "18158513698363146389" disconnecting.
+2025-11-19 15:45:29.069 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/_framework/aspnetcore-browser-refresh.js - null null
+2025-11-19 15:45:29.069 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/_vs/browserLink - null null
+2025-11-19 15:45:29.070 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/ - null null
+2025-11-19 15:45:29.183 +05:30 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-11-19 15:45:29.191 +05:30 [DBG] Executing API description provider 'EndpointMetadataApiDescriptionProvider' from assembly Microsoft.AspNetCore.Mvc.ApiExplorer v9.0.0.0.
+2025-11-19 15:45:29.203 +05:30 [DBG] Script injected: /_framework/aspnetcore-browser-refresh.js
+2025-11-19 15:45:29.226 +05:30 [DBG] Executing API description provider 'DefaultApiDescriptionProvider' from assembly Microsoft.AspNetCore.Mvc.ApiExplorer v9.0.0.0.
+2025-11-19 15:45:29.236 +05:30 [DBG] Connection ID "18374686523426603172" disconnecting.
+2025-11-19 15:45:29.279 +05:30 [DBG] Connection ID "18374686484771897393" disconnecting.
+2025-11-19 15:45:29.233 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/_framework/aspnetcore-browser-refresh.js - 200 16537 application/javascript; charset=utf-8 182.7081ms
+2025-11-19 15:45:29.284 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/_vs/browserLink - 200 null text/javascript; charset=UTF-8 236.3299ms
+2025-11-19 15:45:29.322 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/swagger/v1/swagger.json - null null
+2025-11-19 15:45:29.336 +05:30 [DBG] No candidates found for the request path '/'
+2025-11-19 15:45:29.342 +05:30 [DBG] No candidates found for the request path '/swagger/v1/swagger.json'
+2025-11-19 15:45:29.345 +05:30 [DBG] Request did not match any endpoints
+2025-11-19 15:45:29.346 +05:30 [DBG] Request did not match any endpoints
+2025-11-19 15:45:29.600 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-19 15:45:29.629 +05:30 [INF] Hosting environment: Development
+2025-11-19 15:45:29.631 +05:30 [INF] Content root path: C:\Users\sagnihotri\MinimalEshopApplication\MinimalEshop.Presentations
+2025-11-19 15:45:29.632 +05:30 [DBG] Hosting started
+2025-11-19 15:45:29.967 +05:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-11-19 15:45:29.980 +05:30 [INF] HTTP GET / responded 404 in 267.9845 ms
+2025-11-19 15:45:29.995 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/ - 499 null null 947.4982ms
+2025-11-19 15:45:30.013 +05:30 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:44310/, Response status code: 499
+2025-11-19 15:45:30.072 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 750.3795ms
+2025-11-19 15:45:30.091 +05:30 [DBG] Connection ID "18374686484771897395" disconnecting.
+2025-11-19 15:45:44.625 +05:30 [INF] Request starting HTTP/2 POST https://localhost:44310/users/Login - application/json 56
+2025-11-19 15:45:44.631 +05:30 [DBG] 1 candidate(s) found for the request path '/users/Login'
+2025-11-19 15:45:44.636 +05:30 [DBG] Request matched endpoint 'HTTP: POST /users/Login'
+2025-11-19 15:45:44.641 +05:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-11-19 15:45:44.666 +05:30 [INF] Executing endpoint 'HTTP: POST /users/Login'
+2025-11-19 15:45:44.838 +05:30 [DBG] An 'IServiceProvider' was created for internal use by Entity Framework.
+2025-11-19 15:45:44.908 +05:30 [INF] POST/ Login User
+2025-11-19 15:45:45.305 +05:30 [DBG] The index {'CartId'} was not created on entity type 'CartItem' as the properties are already covered by the index {'CartId', 'Id'}.
+2025-11-19 15:45:45.398 +05:30 [DBG] The property 'CartItem.CartId' was created in shadow state because there are no eligible CLR members with a matching name.
+2025-11-19 15:45:45.405 +05:30 [DBG] The property 'CartItem.Id' was created in shadow state because there are no eligible CLR members with a matching name.
+2025-11-19 15:45:45.486 +05:30 [DBG] Entity Framework Core 9.0.9 initialized 'MongoDbContext' using provider 'MongoDB.EntityFrameworkCore:9.0.3+24ede2e737b01e192bddc5eafb855a40d35d0781' with options: ConnectionString=mongodb+srv://Sharanya:redacted@cluster0.m2cqpvh.mongodb.net DatabaseName=MinimalEshopDB 
+2025-11-19 15:45:45.726 +05:30 [DBG] Generated query execution expression: 
+'queryContext => ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync<User>(
+    asyncEnumerable: MongoShapedQueryCompilingExpressionVisitor.TranslateAndExecuteQuery<User, User>(
+        queryContext: queryContext, 
+        entityType: EntityType: User, 
+        bsonSerializerFactory: BsonSerializerFactory, 
+        queryExpression: [MongoDB.EntityFrameworkCore.Query.Expressions.MongoQueryExpression], 
+        shaper: Func<QueryContext, BsonDocument, User>, 
+        contextType: MinimalEshop.Infrastructure.Context.MongoDbContext, 
+        standAloneStateManager: False, 
+        threadSafetyChecksEnabled: True, 
+        resultCardinality: SingleOrDefault), 
+    cancellationToken: queryContext.CancellationToken)'
+2025-11-19 15:45:45.939 +05:30 [INF] Executed MQL query
+MinimalEshopDB.User.aggregate([?])
+2025-11-19 15:45:45.980 +05:30 [DBG] Context 'MongoDbContext' started tracking 'User' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:45:46.064 +05:30 [INF] User Loggedin
+2025-11-19 15:45:46.079 +05:30 [INF] Setting HTTP status code 200.
+2025-11-19 15:45:46.087 +05:30 [INF] Writing value of type 'Result' as Json.
+2025-11-19 15:45:46.098 +05:30 [INF] Executed endpoint 'HTTP: POST /users/Login'
+2025-11-19 15:45:46.101 +05:30 [INF] HTTP POST /users/Login responded 200 in 1461.2851 ms
+2025-11-19 15:45:46.139 +05:30 [DBG] Connection ID "18374686493361832067" disconnecting.
+2025-11-19 15:45:46.152 +05:30 [DBG] 'MongoDbContext' disposed.
+2025-11-19 15:45:46.160 +05:30 [INF] Request finished HTTP/2 POST https://localhost:44310/users/Login - 200 null application/json; charset=utf-8 1535.3567ms
+2025-11-19 15:47:11.519 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/products - null null
+2025-11-19 15:47:11.522 +05:30 [DBG] 1 candidate(s) found for the request path '/products'
+2025-11-19 15:47:11.524 +05:30 [DBG] Request matched endpoint 'HTTP: GET /products/'
+2025-11-19 15:47:11.582 +05:30 [DBG] Successfully validated the token.
+2025-11-19 15:47:11.586 +05:30 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-11-19 15:47:11.595 +05:30 [DBG] Authorization was successful.
+2025-11-19 15:47:11.597 +05:30 [INF] Executing endpoint 'HTTP: GET /products/'
+2025-11-19 15:47:11.643 +05:30 [INF] GET/ Product Called
+2025-11-19 15:47:11.652 +05:30 [DBG] Entity Framework Core 9.0.9 initialized 'MongoDbContext' using provider 'MongoDB.EntityFrameworkCore:9.0.3+24ede2e737b01e192bddc5eafb855a40d35d0781' with options: ConnectionString=mongodb+srv://Sharanya:redacted@cluster0.m2cqpvh.mongodb.net DatabaseName=MinimalEshopDB 
+2025-11-19 15:47:11.665 +05:30 [DBG] Generated query execution expression: 
+'queryContext => MongoShapedQueryCompilingExpressionVisitor.TranslateAndExecuteQuery<Product, Product>(
+    queryContext: queryContext, 
+    entityType: EntityType: Product, 
+    bsonSerializerFactory: BsonSerializerFactory, 
+    queryExpression: [MongoDB.EntityFrameworkCore.Query.Expressions.MongoQueryExpression], 
+    shaper: Func<QueryContext, BsonDocument, Product>, 
+    contextType: MinimalEshop.Infrastructure.Context.MongoDbContext, 
+    standAloneStateManager: False, 
+    threadSafetyChecksEnabled: True, 
+    resultCardinality: Enumerable)'
+2025-11-19 15:47:12.003 +05:30 [INF] Executed MQL query
+MinimalEshopDB.Products.aggregate([?])
+2025-11-19 15:47:12.043 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.066 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.069 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.075 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.080 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.082 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.102 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.112 +05:30 [DBG] Context 'MongoDbContext' started tracking 'Product' entity. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see key values.
+2025-11-19 15:47:12.128 +05:30 [INF] Retrieved 8 products
+2025-11-19 15:47:12.132 +05:30 [INF] Setting HTTP status code 200.
+2025-11-19 15:47:12.146 +05:30 [INF] Writing value of type 'Result' as Json.
+2025-11-19 15:47:12.170 +05:30 [INF] Executed endpoint 'HTTP: GET /products/'
+2025-11-19 15:47:12.187 +05:30 [INF] HTTP GET /products responded 200 in 661.7501 ms
+2025-11-19 15:47:12.190 +05:30 [DBG] 'MongoDbContext' disposed.
+2025-11-19 15:47:12.206 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/products - 200 null application/json; charset=utf-8 687.1964ms
+2025-11-19 15:47:12.198 +05:30 [DBG] Connection ID "18158513698363146391" disconnecting.

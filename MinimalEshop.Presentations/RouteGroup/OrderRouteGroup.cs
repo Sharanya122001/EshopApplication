@@ -11,23 +11,20 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService, ILoggerFactory loggerFactory) =>
+            group.MapPost("/checkout", async (ClaimsPrincipal user, OrderService orderService) =>
             {
-                var logger = loggerFactory.CreateLogger("OrderRouteLogger");
-                logger.LogInformation("POST/ CheckoutProduct");
-
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var (success, message, data) = await orderService.CheckOutAsync(userId);
+                var result = await orderService.CheckOutAsync(userId);
 
-                if (!success)
-                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
+                if (!result.Success)
+                    return Results.BadRequest(result);
 
-                logger.LogInformation("Checkout Products");
+                return Results.Ok(result);
 
-                return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
+
 
             group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService, ILoggerFactory loggerFactory) =>
             {

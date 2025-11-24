@@ -34,8 +34,8 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("GET /products/search called with query = {Query}", query);
 
-                if (string.IsNullOrWhiteSpace(query))
-                    return Results.BadRequest(Result.Fail(null, "Query cannot be empty", StatusCodes.Status400BadRequest));
+                //if (string.IsNullOrWhiteSpace(query))
+                //    return Results.BadRequest(Result.Fail(null, "Query cannot be empty", StatusCodes.Status400BadRequest));
 
                 var results = await _service.SearchProductsAsync(query);
 

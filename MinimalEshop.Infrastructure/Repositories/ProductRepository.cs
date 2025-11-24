@@ -22,13 +22,11 @@ namespace MinimalEshop.Infrastructure.Repositories
 
         public async Task<List<Product>> SearchAsync(string keyword)
             {
-            if (string.IsNullOrWhiteSpace(keyword))
-                return new List<Product>();
 
             return await _context.Products
                  .Where(p => p.Name.ToLower().Contains(keyword.ToLower()))
                  .ToListAsync();
-        }
+            }
 
 
         public async Task<Product> AddAsync(Product product)

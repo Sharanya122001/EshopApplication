@@ -14,76 +14,25 @@ namespace MinimalEshop.Infrastructure.Repositories
             {
             _context = context;
             }
-        public async Task<(bool success, string message, object data)> CheckOutAsync(string userId)
+        public async Task<List<Cart>> GetUserCartAsync(string userId)
             {
-            var cartItems = await _context.Carts
-                .Where(c => c.UserId == userId)
+            return await _context.Carts
                 .Include(c => c.Products)
+                .Where(c => c.UserId == userId)
                 .ToListAsync();
+            }
 
-            if (cartItems == null || !cartItems.Any())
-                return (false, "Your cart is empty. Please add items before checkout.", null);
-
-            var totalAmount = cartItems.Sum(c =>
-                (c.Products ?? new List<CartItem>())
-                .Sum(p => p.Price * p.Quantity)
-            );
-
-            var order = new Order
-                {
-                UserId = userId,
-                Name = "Checkout Order",
-                OrderDate = DateTime.UtcNow,
-                TotalAmount = totalAmount,
-                Status = "Pending"
-                };
-
+        public async Task SaveOrderAsync(Order order, List<OrderItem> items)
+            {
             await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync(); 
-
-            var orderItems = new List<OrderItem>();
-
-            foreach (var cart in cartItems)
-                {
-                foreach (var product in cart.Products ?? new List<CartItem>())
-                    {
-                    orderItems.Add(new OrderItem
-                        {
-                        OrderId = order.OrderId,
-                        ProductId = product.ProductId,
-                        Name = string.IsNullOrEmpty(product.Name) ? "Unknown Product" : product.Name,
-                        Quantity = product.Quantity,
-                        Price = product.Price
-                        });
-                    }
-                }
-
-            if (orderItems.Any())
-                {
-                await _context.OrderItems.AddRangeAsync(orderItems);
-                await _context.SaveChangesAsync();
-                }
-
-            _context.Carts.RemoveRange(cartItems);
+            await _context.OrderItems.AddRangeAsync(items);
             await _context.SaveChangesAsync();
+            }
 
-            var responseData = new
-                {
-                order.OrderId,
-                order.UserId,
-                order.OrderDate,
-                order.TotalAmount,
-                order.Status,
-                Items = orderItems.Select(i => new
-                    {
-                    i.ProductId,
-                    i.Name,
-                    i.Quantity,
-                    i.Price
-                    })
-                };
-
-            return (true, "Checkout successful. Please choose your payment method.", responseData);
+        public async Task ClearCartAsync(List<Cart> carts)
+            {
+            _context.Carts.RemoveRange(carts);
+            await _context.SaveChangesAsync();
             }
 
         public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
@@ -159,8 +108,6 @@ namespace MinimalEshop.Infrastructure.Repositories
 
             return (true, "Order details fetched successfully.", responseData);
             }
-
-
 
         }
 

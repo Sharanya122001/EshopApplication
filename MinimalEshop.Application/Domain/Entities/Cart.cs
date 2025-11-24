@@ -12,5 +12,10 @@ namespace MinimalEshop.Application.Domain.Entities
         public string CartId { get; set; } = ObjectId.GenerateNewId().ToString();
         public string UserId { get; set; }
         public List<CartItem> Products { get; set; } = new();
+
+        public decimal GetTotalPrice()
+            {
+            return Products.Sum(p => p.Price * p.Quantity);
+            }
         }
     }
