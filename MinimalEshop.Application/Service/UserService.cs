@@ -1,4 +1,5 @@
-﻿using MinimalEshop.Application.Domain.Entities;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service

@@ -20,6 +20,8 @@ using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Serilog;
 using Serilog.AspNetCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 
 
 namespace Presentation
@@ -29,6 +31,13 @@ namespace Presentation
         public static void Main(string[] args)
             {
             var builder = WebApplication.CreateBuilder(args);
+
+            //registering the httpclient i.e., to call stripe api
+            builder.Services.AddHttpClient("StripeDemo", c =>
+            {
+                c.BaseAddress = new Uri("https://localhost:44325/");
+            });
+
 
             builder.Host.UseSerilog((context, services, loggerConfig) =>
             {
@@ -51,6 +60,7 @@ namespace Presentation
                 return new MongoClient(settings.ConnectionString);
             });
 
+            //configuring mongoDb with EFcore
             builder.Services.AddDbContext<MinimalEshop.Infrastructure.Context.MongoDbContext>(options =>
             {
                 options.UseMongoDB("mongodb+srv://Sharanya:Sharanya@cluster0.m2cqpvh.mongodb.net/", "MinimalEshopDB");//usemongo takes 2 arguments one is connectionstring and second is database name
@@ -147,7 +157,12 @@ namespace Presentation
                    { jwtSecurityScheme, Array.Empty<string>() }
                 });
             });
-
+            //registered redis cache
+            builder.Services.AddStackExchangeRedisCache(
+                Options => {
+                    Options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs";
+                    Options.InstanceName = "MinimalEshopCacheInstance";
+                    });
             var app = builder.Build();
 
             // Global exception handler
@@ -182,6 +197,7 @@ namespace Presentation
 
             app.Use(async (context, next) =>
             {
+            https://localhost:44310/orders/paymentprocess-redirect?orderId=692979f4f475f32dbd5f3004&amount=10000
                 await next();
                 var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 

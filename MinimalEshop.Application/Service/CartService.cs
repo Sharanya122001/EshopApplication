@@ -1,4 +1,5 @@
-﻿using MinimalEshop.Application.Domain.Entities;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Interface;
 
 namespace MinimalEshop.Application.Service
@@ -7,12 +8,13 @@ namespace MinimalEshop.Application.Service
         {
         private readonly ICart _cart;
         private readonly IProduct _product;
+        private readonly IDistributedCache _cache;
 
-        public CartService(ICart cart, IProduct product)
+        public CartService(ICart cart, IProduct product, IDistributedCache cache)
             {
             _cart = cart;
             _product = product;
-
+            _cache = cache;
             }
         public async Task<bool> AddToCartAsync(string productId, int quantity, string userId)
             {
@@ -34,12 +36,28 @@ namespace MinimalEshop.Application.Service
                     }
                 }
                 };
+            var result = await _cart.AddToCartAsync(cart);
+            if (result)
+                {
+                return true;
+                }
+            await _cache.RemoveAsync($"cart_{userId}");
+            await _cache.SetStringAsync($"cart_{userId}", System.Text.Json.JsonSerializer.Serialize(cart), new DistributedCacheEntryOptions
+                {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                });
 
-            return await _cart.AddToCartAsync(cart);
+            return true;
             }
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
             {
+            var cached = await _cache.GetStringAsync($"cart_{userId}");
+            if (cached != null)
+                {
+                return System.Text.Json.JsonSerializer.Deserialize<Cart>(cached);
+                }
+
             var cart = await _cart.GetCartByUserIdAsync(userId);
             if (cart == null) return null;
 
@@ -52,6 +70,10 @@ namespace MinimalEshop.Application.Service
                     item.Price = product.Price;
                     }
                 }
+            await _cache.SetStringAsync($"cart_{userId}", System.Text.Json.JsonSerializer.Serialize(cart), new DistributedCacheEntryOptions
+                {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                });
 
             return cart;
             }
@@ -59,7 +81,13 @@ namespace MinimalEshop.Application.Service
 
         public async Task<bool> DeleteProductFromCartAsync(string userId, string productId, int quantity)
             {
-            return await _cart.DeleteAsync(userId, productId, quantity);
+            var result=await _cart.DeleteAsync(userId, productId, quantity);
+            if (!result)
+                {
+                return false;
+                }
+                await _cache.RemoveAsync($"cart_{userId}");
+            return true;
             }
 
         }

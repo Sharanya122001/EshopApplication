@@ -1,0 +1,37 @@
+2025-11-26 19:15:02.200 +05:30 [DBG] Hosting starting
+2025-11-26 19:15:02.499 +05:30 [INF] User profile is available. Using 'C:\Users\sagnihotri\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-11-26 19:15:02.531 +05:30 [DBG] Reading data from file 'C:\Users\sagnihotri\AppData\Local\ASP.NET\DataProtection-Keys\key-a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1.xml'.
+2025-11-26 19:15:02.631 +05:30 [DBG] Found key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1}.
+2025-11-26 19:15:02.784 +05:30 [DBG] Considering key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} with expiration date 2025-12-28 06:56:43Z as default key.
+2025-11-26 19:15:02.806 +05:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-11-26 19:15:02.811 +05:30 [DBG] Decrypting secret element using Windows DPAPI.
+2025-11-26 19:15:02.818 +05:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-11-26 19:15:02.825 +05:30 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2025-11-26 19:15:02.830 +05:30 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2025-11-26 19:15:02.836 +05:30 [DBG] Using key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} as the default key.
+2025-11-26 19:15:02.840 +05:30 [DBG] Key ring with default key {a4b50fc2-b772-4cb7-a1ea-1b1b3ab7e1a1} was loaded during application startup.
+2025-11-26 19:15:02.850 +05:30 [DBG] Middleware loaded
+2025-11-26 19:15:02.859 +05:30 [DBG] Middleware loaded. Script /_framework/aspnetcore-browser-refresh.js (16537 B).
+2025-11-26 19:15:02.863 +05:30 [DBG] Middleware loaded. Script /_framework/blazor-hotreload.js (799 B).
+2025-11-26 19:15:03.222 +05:30 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2025-11-26 19:15:03.228 +05:30 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-11-26 19:15:03.587 +05:30 [DBG] Middleware loaded: DOTNET_MODIFIABLE_ASSEMBLIES=debug, __ASPNETCORE_BROWSER_TOOLS=true
+2025-11-26 19:15:03.598 +05:30 [DBG] Loaded hosting startup assembly MinimalEshop.Presentations
+2025-11-26 19:15:03.602 +05:30 [DBG] Loaded hosting startup assembly Microsoft.WebTools.ApiEndpointDiscovery
+2025-11-26 19:15:03.615 +05:30 [DBG] Loaded hosting startup assembly Microsoft.AspNetCore.Watch.BrowserRefresh
+2025-11-26 19:15:03.617 +05:30 [DBG] Loaded hosting startup assembly Microsoft.WebTools.BrowserLink.Net
+2025-11-26 19:15:03.689 +05:30 [INF] Request starting HTTP/2 GET https://localhost:44310/ - null null
+2025-11-26 19:15:03.733 +05:30 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-11-26 19:15:03.743 +05:30 [DBG] Executing API description provider 'EndpointMetadataApiDescriptionProvider' from assembly Microsoft.AspNetCore.Mvc.ApiExplorer v9.0.0.0.
+2025-11-26 19:15:03.755 +05:30 [DBG] Executing API description provider 'DefaultApiDescriptionProvider' from assembly Microsoft.AspNetCore.Mvc.ApiExplorer v9.0.0.0.
+2025-11-26 19:15:03.792 +05:30 [DBG] No candidates found for the request path '/'
+2025-11-26 19:15:03.797 +05:30 [DBG] Request did not match any endpoints
+2025-11-26 19:15:04.002 +05:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-11-26 19:15:04.008 +05:30 [INF] HTTP GET / responded 404 in 131.2353 ms
+2025-11-26 19:15:04.033 +05:30 [DBG] Connection ID "17870283365161107463" disconnecting.
+2025-11-26 19:15:04.039 +05:30 [INF] Request finished HTTP/2 GET https://localhost:44310/ - 404 null null 369.1964ms
+2025-11-26 19:15:04.049 +05:30 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:44310/, Response status code: 404
+2025-11-26 19:15:04.079 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-26 19:15:04.082 +05:30 [INF] Hosting environment: Development
+2025-11-26 19:15:04.084 +05:30 [INF] Content root path: C:\Users\sagnihotri\MinimalEshopApplication\MinimalEshop.Presentations
+2025-11-26 19:15:04.086 +05:30 [DBG] Hosting started

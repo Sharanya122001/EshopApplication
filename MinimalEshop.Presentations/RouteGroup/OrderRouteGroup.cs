@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
+using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
+using Stripe;
 using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
@@ -25,39 +27,64 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Order");
 
-            group.MapPost("/paymentprocess", async (ClaimsPrincipal user, [FromBody] PaymentRequest request, OrderService orderService, ILoggerFactory loggerFactory) =>
+               
+            group.MapPost("/paymentprocess", async ( PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
             {
-                var logger = loggerFactory.CreateLogger("OrderRouteLogger");
-                logger.LogInformation("POST /paymentprocess called");
+                var logger = loggerFactory.CreateLogger("PaymentProcess");
+                logger.LogInformation("Payment processing started");
 
-                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                    return Results.Unauthorized();
+                var method = request.PaymentMethod.Trim().ToLower();
 
-                var (success, message) = await orderService.ProcessPaymentAsync(userId, request.PaymentProcess);
-
-                if (!success)
+                if (method == "cod" || method == "cash on delivery")
                     {
-                    logger.LogWarning("Payment failed: {Message}", message);
-                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
+                    return Results.Ok(new { message = "Cash on Delivery order placed successfully" });
                     }
-
-                logger.LogInformation("Payment successful with method {Method}", request.PaymentProcess);
-
-                return Results.Ok(Result.Ok(new { message }, null, StatusCodes.Status200OK));
-
-            })
-            .RequireAuthorization("UserOrAdmin")
-            .WithTags("Order")
-            .WithOpenApi(operation => new(operation)
+                //mapping the user method to stripe method
+                var stripeMethod = method switch
                     {
-                     Description =
-                     "Payment Method Values:<br>" +
-                     "1 = UPI,<br>" +
-                     "2 = Cash on Delivery,<br>" +
-                     "3 = Card,<br>" +
-                     "4 = NetBanking"
-                     });
+                        "card" => "card",
+                        "upi" => "upi",
+                        "netbanking" => "netbanking",
+                        _ => null//invalid , so returns error
+                        };
+
+                if (stripeMethod is null)
+                    return Results.BadRequest(new { message = "Invalid payment method" });
+
+                var client = httpClientFactory.CreateClient("StripeDemo");
+
+                var createResponse = await client.PostAsJsonAsync("/create-payment-intent", new//sends post req to stripeto paymentintend with payload
+                    {
+                    Amount = request.Amount,
+                    Currency = "inr",
+                    PaymentMethodType = stripeMethod
+                    });
+
+                if (!createResponse.IsSuccessStatusCode)
+                    return Results.BadRequest(new { message = "Stripe PaymentIntent creation failed" });
+
+                var createResult = await createResponse.Content.ReadFromJsonAsync<CreatePaymentIntentResult>();
+
+                var confirmResponse = await client.PostAsJsonAsync("/confirm-payment-intent", new//confrims the paymentintent
+                    {
+                    PaymentIntentId = createResult.paymentIntentId,
+                    PaymentMethodId = request.PaymentMethodId
+                    });
+
+                if (!confirmResponse.IsSuccessStatusCode)
+                    return Results.BadRequest(new { message = "Stripe PaymentIntent confirmation failed" });
+                //reads the confirmed paymentintent result
+                var confirmResult = await confirmResponse.Content.ReadFromJsonAsync<ConfirmPaymentIntentResult>();
+
+                return Results.Ok(new//returnss final success response
+                    {
+                    message = "Payment successful",
+                    paymentIntentId = confirmResult.id,
+                    stripeStatus = confirmResult.status
+                    });
+            })
+             .WithTags("Order")
+             .RequireAuthorization("UserOrAdmin");
 
             group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
             {

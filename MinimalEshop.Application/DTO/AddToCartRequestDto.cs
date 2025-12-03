@@ -3,7 +3,7 @@
     public class AddToCartRequestDto
         {
         public string ProductId { get; set; }
-        public int price { get; set; }
+        public decimal price { get; set; }
         public int Quantity { get; set; }
         public string Name { get; set; }
         }

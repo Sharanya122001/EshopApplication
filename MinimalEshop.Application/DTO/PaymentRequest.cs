@@ -4,6 +4,10 @@ namespace MinimalEshop.Application.DTO
     {
     public class PaymentRequest
         {
-        public PaymentMethod PaymentProcess { get; set; }
+        public string OrderId { get; set; }
+        public string PaymentMethod { get; set; }
+        public long Amount { get; set; }
+        public string Currency { get; set; }
+        public string PaymentMethodId { get; set; }
         }
     }
