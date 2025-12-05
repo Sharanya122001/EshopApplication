@@ -13,7 +13,7 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/add", async ([FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+            group.MapPost("/add", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey,[FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("POST/Cart/AddToCart called to add {ProductId} to cart", cartDto.ProductId);
@@ -45,6 +45,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     };
 
                 var created = await _service.AddToCartAsync(
+                    idempotencyKey,
                     cartDto.ProductId,
                     cartDto.Quantity,
                     userId

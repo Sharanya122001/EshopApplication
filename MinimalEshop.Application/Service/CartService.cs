@@ -8,19 +8,27 @@ namespace MinimalEshop.Application.Service
         {
         private readonly ICart _cart;
         private readonly IProduct _product;
-        private readonly IDistributedCache _cache;
+        private readonly ICacheService _cache;
 
-        public CartService(ICart cart, IProduct product, IDistributedCache cache)
+        public CartService(ICart cart, IProduct product, ICacheService cache)
             {
             _cart = cart;
             _product = product;
             _cache = cache;
             }
-        public async Task<bool> AddToCartAsync(string productId, int quantity, string userId)
+        public async Task<bool> AddToCartAsync(string idempotency,string productId, int quantity, string userId)
             {
+            var cachedResult = await _cache.GetAsync<bool?>(idempotency);
+            if (cachedResult != null)
+                return cachedResult.Value;
+
             var product = await _product.GetProductByIdAsync(productId);
             if (product == null)
+                {
+                await _cache.SetAsync(idempotency, false);
                 return false;
+                }
+
 
             var cart = new Cart
                 {
@@ -37,45 +45,35 @@ namespace MinimalEshop.Application.Service
                 }
                 };
             var result = await _cart.AddToCartAsync(cart);
-            if (result)
-                {
-                return true;
-                }
-            await _cache.RemoveAsync($"cart_{userId}");
-            await _cache.SetStringAsync($"cart_{userId}", System.Text.Json.JsonSerializer.Serialize(cart), new DistributedCacheEntryOptions
-                {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-                });
 
-            return true;
+            await _cache.SetAsync(idempotency, result);
+
+            await _cache.RemoveAsync($"cart_{userId}");
+
+            return result;
             }
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
             {
-            var cached = await _cache.GetStringAsync($"cart_{userId}");
-            if (cached != null)
+            return await _cache.GetOrSetAsync(
+                $"cart_{userId}",
+                async () =>
                 {
-                return System.Text.Json.JsonSerializer.Deserialize<Cart>(cached);
-                }
+                    var cart = await _cart.GetCartByUserIdAsync(userId);
+                    if (cart == null) return null;
 
-            var cart = await _cart.GetCartByUserIdAsync(userId);
-            if (cart == null) return null;
+                    foreach (var item in cart.Products)
+                        {
+                        var product = await _product.GetProductByIdAsync(item.ProductId);
+                        if (product != null)
+                            {
+                            item.Name = product.Name;
+                            item.Price = product.Price;
+                            }
+                        }
 
-            foreach (var item in cart.Products)
-                {
-                var product = await _product.GetProductByIdAsync(item.ProductId);
-                if (product != null)
-                    {
-                    item.Name = product.Name;
-                    item.Price = product.Price;
-                    }
-                }
-            await _cache.SetStringAsync($"cart_{userId}", System.Text.Json.JsonSerializer.Serialize(cart), new DistributedCacheEntryOptions
-                {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                    return cart;
                 });
-
-            return cart;
             }
 
 

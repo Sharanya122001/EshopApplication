@@ -45,7 +45,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Product");
 
-            group.MapPost("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey,[FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("POST /products called to add product {Name}", productDto.Name);
@@ -58,7 +58,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     CategoryId = productDto.CategoryId,
                     Addedon = productDto.Addedon
                     };
-                var created = await _service.CreateProductAsync(product);
+                var created = await _service.CreateProductAsync(idempotencyKey,product);
 
                 logger.LogInformation("Product created Id = {ProductId}", created.ProductId);
 
