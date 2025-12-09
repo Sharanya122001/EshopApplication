@@ -13,7 +13,7 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/checkout", async (ClaimsPrincipal user, [FromServices] OrderService orderService) =>
+            group.MapPost("/", async (ClaimsPrincipal user, [FromServices] OrderService orderService) =>
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -28,7 +28,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             .WithTags("Order");
 
                
-            group.MapPost("/paymentprocess", async ( PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
+            group.MapPost("/{orderId}/payment", async (string orderId, PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("PaymentProcess");
                 logger.LogInformation("Payment processing started");
@@ -76,7 +76,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                 //reads the confirmed paymentintent result
                 var confirmResult = await confirmResponse.Content.ReadFromJsonAsync<ConfirmPaymentIntentResult>();
 
-                return Results.Ok(new//returnss final success response
+                return Results.Ok(new
                     {
                     message = "Payment successful",
                     paymentIntentId = confirmResult.id,
@@ -86,29 +86,7 @@ namespace MinimalEshop.Presentation.RouteGroup
              .WithTags("Order")
              .RequireAuthorization("UserOrAdmin");
 
-            //group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
-            //{
-            //    var logger = loggerFactory.CreateLogger("OrderRouteLogger");
-            //    logger.LogInformation("GET/ Getting Order details");
-
-            //    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            //    if (string.IsNullOrEmpty(userId))
-            //        return Results.Unauthorized();
-
-            //    var (success, message, data) = await orderService.GetOrderDetailsAsync(userId);
-
-            //    if (!success)
-            //        return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
-
-            //    logger.LogInformation("Retrieved Order details");
-
-            //    return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
-            //})
-            //.RequireAuthorization("UserOrAdmin")
-            //.WithTags("Order");
-
-            group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
+            group.MapGet("/", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("OrderRouteLogger");
                 logger.LogInformation("GET/ Getting Order details");

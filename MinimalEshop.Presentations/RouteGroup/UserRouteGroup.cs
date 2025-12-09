@@ -12,7 +12,7 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder UserAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/Register", async ([FromServices] UserService _service, [FromServices] IValidator<UserDto> validator, [FromBody] UserDto userDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async ([FromServices] UserService _service, [FromServices] IValidator<UserDto> validator, [FromBody] UserDto userDto, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("UserRouteLogger");
                 logger.LogInformation("POST/ Register User");
@@ -47,7 +47,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             })
             .WithTags("User");
 
-            group.MapPost("/Login", async ([FromServices] UserService _service, [FromServices] IValidator<LoginDto> validator, [FromBody] LoginDto loginDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async ([FromServices] UserService _service, [FromServices] IValidator<LoginDto> validator, [FromBody] LoginDto loginDto, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("UserRouteLogger");
                 logger.LogInformation("POST/ Login User");

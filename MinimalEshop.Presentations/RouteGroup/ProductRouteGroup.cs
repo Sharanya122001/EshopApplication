@@ -34,9 +34,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("GET /products/search called with query = {Query}", query);
 
-                //if (string.IsNullOrWhiteSpace(query))
-                //    return Results.BadRequest(Result.Fail(null, "Query cannot be empty", StatusCodes.Status400BadRequest));
-
                 var results = await _service.SearchProductsAsync(query);
 
                 logger.LogInformation("Search returned {Count} items", results.Count());
@@ -66,7 +63,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 
-            group.MapPut("/update", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
+            group.MapPut("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("PUT /products/update called for ProductId = {ProductId}", productDto.ProductId);
@@ -89,7 +86,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("AdminOnly")
             .WithTags("Product");
 
-            group.MapDelete("/delete", async ([FromServices] ProductService _service, [FromServices] IValidator<ProductDto> validator, [FromQuery] string ProductId, ILoggerFactory loggerFactory) =>
+            group.MapDelete("/", async ([FromServices] ProductService _service, [FromServices] IValidator<ProductDto> validator, [FromQuery] string ProductId, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("DELETE/product/delete called for the ProductId={ProductId}", ProductId);

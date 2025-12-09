@@ -13,7 +13,7 @@ namespace MinimalEshop.Presentation.RouteGroup
         {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
             {
-            group.MapPost("/add", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey,[FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey,[FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("POST/Cart/AddToCart called to add {ProductId} to cart", cartDto.ProductId);
@@ -60,7 +60,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             }).RequireAuthorization("UserOrAdmin")
             .WithTags("Cart");
 
-            group.MapDelete("/delete", async ([FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+            group.MapDelete("/items/{productId}", async ([FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("DELETE/Cart/product called to delete {ProductId} from cart", productId);
@@ -99,7 +99,7 @@ namespace MinimalEshop.Presentation.RouteGroup
 
 
 
-            group.MapGet("/getcart", async (HttpContext context, [FromServices] CartService _service, ILoggerFactory loggerFactory) =>
+            group.MapGet("/", async (HttpContext context, [FromServices] CartService _service, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("GET/Cart called to get cart")
