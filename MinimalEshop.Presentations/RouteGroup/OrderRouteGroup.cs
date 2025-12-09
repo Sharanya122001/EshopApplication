@@ -28,7 +28,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             .WithTags("Order");
 
                
-            group.MapPost("/{orderId}/payment", async (string orderId, PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
+            group.MapPost("/payment", async (PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("PaymentProcess");
                 logger.LogInformation("Payment processing started");

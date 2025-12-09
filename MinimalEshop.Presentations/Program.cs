@@ -89,7 +89,6 @@ namespace Presentation
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ICacheService, CacheService>();
 
-
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
