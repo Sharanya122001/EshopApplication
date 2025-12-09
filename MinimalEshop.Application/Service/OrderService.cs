@@ -15,7 +15,7 @@ namespace MinimalEshop.Application.Service
             {
             _context = context;
             }
-        
+
         public async Task<Result<object>> CheckOutAsync(string userId)
             {
             if (string.IsNullOrEmpty(userId))
@@ -80,42 +80,119 @@ namespace MinimalEshop.Application.Service
             return Result<object>.Ok(orderDto, "Checkout successful", 200);
             }
 
-        public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
+        //public async Task<(bool success, string message)> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
+        //    {
+        //    if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.NetBanking)
+        //        return (false, "Invalid payment method. Please choose a valid one.");
+
+        //        var order = await _context.GetLatestOrderAsync(userId);
+
+        //    if (order == null)
+        //        return (false, "Checkout is pending. Please complete checkout before making payment.");
+
+        //    if (order.Status == "Completed")
+        //        return (false, "Payment is already done.");
+
+        //    order.ProcessPayment(paymentMethod);
+
+        //    await _context.UpdateOrderAsync(order);
+
+        //    return (true, $"Payment processed successfully using: {paymentMethod}");
+        //    }
+        public async Task<PaymentResult> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
             if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.NetBanking)
-                return (false, "Invalid payment method. Please choose a valid one.");
-
-                var order = await _context.GetLatestOrderAsync(userId);
-
-            if (order == null)
-                return (false, "Checkout is pending. Please complete checkout before making payment.");
-
-            if (order.Status == "Completed")
-                return (false, "Payment is already done.");
-
-            order.ProcessPayment(paymentMethod);
-
-            await _context.UpdateOrderAsync(order);
-
-            return (true, $"Payment processed successfully using: {paymentMethod}");
-            }
-
-        public async Task<Order?> GetLatestOrderAsync(string userId)
-            {
-            var result= await _context.GetLatestOrderAsync(userId);
-            return result;
-            }
-
-        //bool success, string message, object data remove and operate with classes
-        public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)//create a strongly typed class , reuse the result class,use Ienum 
-            {
-            if (string.IsNullOrWhiteSpace(userId))
-                return (false, "Invalid UserId.", null);
+                return new PaymentResult
+                    {
+                    Success = false,
+                    Message = "Invalid payment method. Please choose a valid one."
+                    };
 
             var order = await _context.GetLatestOrderAsync(userId);
 
             if (order == null)
-                return (false, "No orders found for this user.", null);
+                return new PaymentResult
+                    {
+                    Success = false,
+                    Message = "Checkout is pending. Please complete checkout before making payment."
+                    };
+
+            if (order.Status == "Completed")
+                return new PaymentResult
+                    {
+                    Success = false,
+                    Message = "Payment is already done."
+                    };
+
+            order.ProcessPayment(paymentMethod);
+            await _context.UpdateOrderAsync(order);
+
+            return new PaymentResult
+                {
+                Success = true,
+                Message = $"Payment processed successfully using: {paymentMethod}",
+                Data = order
+                };
+            }
+
+
+        public async Task<Order?> GetLatestOrderAsync(string userId)
+            {
+            var result = await _context.GetLatestOrderAsync(userId);
+            return result;
+            }
+
+        //bool success, string message, object data remove and operate with classes
+        //public async Task<(bool success, string message, object data)> GetOrderDetailsAsync(string userId)//create a strongly typed class , reuse the result class,use Ienum 
+        //    {
+        //    if (string.IsNullOrWhiteSpace(userId))
+        //        return (false, "Invalid UserId.", null);
+
+        //    var order = await _context.GetLatestOrderAsync(userId);
+
+        //    if (order == null)
+        //        return (false, "No orders found for this user.", null);
+
+        //    var items = await _context.GetOrderItemsAsync(order.OrderId);
+
+        //    var orderDto = new OrderDto
+        //        {
+        //        OrderId = order.OrderId,
+        //        UserId = order.UserId,
+        //        OrderDate = order.OrderDate,
+        //        TotalAmount = order.TotalAmount,
+        //        Status = order.Status,
+        //        PaymentMethod = order.PaymentMethod.ToString(),
+        //        PaymentStatus = order.PaymentStatus.ToString(),
+        //        Items = items.Select(i => new OrderItemDto
+        //            {
+        //            ProductId = i.ProductId,
+        //            Name = i.Name,
+        //            Quantity = i.Quantity,
+        //            Price = i.Price
+        //            }).ToList()
+        //        };
+
+        //    return (true, "Order details fetched successfully.", orderDto);
+        //    }
+
+        public async Task<OrderDetailsResult<OrderDto>> GetOrderDetailsAsync(string userId)
+            {
+            if (string.IsNullOrWhiteSpace(userId))
+                return new OrderDetailsResult<OrderDto>
+                    {
+                    Success = false,
+                    Message = "Invalid UserId."
+                    };
+
+            var order = await _context.GetLatestOrderAsync(userId);
+
+            if (order == null)
+                return new OrderDetailsResult<OrderDto>
+                    {
+                    Success = false,
+                    Message = "No orders found for this user."
+                    };
 
             var items = await _context.GetOrderItemsAsync(order.OrderId);
 
@@ -137,8 +214,14 @@ namespace MinimalEshop.Application.Service
                     }).ToList()
                 };
 
-            return (true, "Order details fetched successfully.", orderDto);
+            return new OrderDetailsResult<OrderDto>
+                {
+                Success = true,
+                Message = "Order details fetched successfully.",
+                Data = orderDto
+                };
             }
+
 
         }
     }

@@ -86,6 +86,28 @@ namespace MinimalEshop.Presentation.RouteGroup
              .WithTags("Order")
              .RequireAuthorization("UserOrAdmin");
 
+            //group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
+            //{
+            //    var logger = loggerFactory.CreateLogger("OrderRouteLogger");
+            //    logger.LogInformation("GET/ Getting Order details");
+
+            //    var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            //    if (string.IsNullOrEmpty(userId))
+            //        return Results.Unauthorized();
+
+            //    var (success, message, data) = await orderService.GetOrderDetailsAsync(userId);
+
+            //    if (!success)
+            //        return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
+
+            //    logger.LogInformation("Retrieved Order details");
+
+            //    return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
+            //})
+            //.RequireAuthorization("UserOrAdmin")
+            //.WithTags("Order");
+
             group.MapGet("/details", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("OrderRouteLogger");
@@ -96,17 +118,16 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (string.IsNullOrEmpty(userId))
                     return Results.Unauthorized();
 
-                var (success, message, data) = await orderService.GetOrderDetailsAsync(userId);
+                var result = await orderService.GetOrderDetailsAsync(userId);
 
-                if (!success)
-                    return Results.BadRequest(Result.Fail(null, message, StatusCodes.Status400BadRequest));
+                if (!result.Success)
+                    return Results.BadRequest(Result.Fail(null, result.Message, StatusCodes.Status400BadRequest));
 
                 logger.LogInformation("Retrieved Order details");
 
-                return Results.Ok(Result.Ok(data, message, StatusCodes.Status200OK));
-            })
-            .RequireAuthorization("UserOrAdmin")
-            .WithTags("Order");
+                return Results.Ok(Result.Ok(result.Data, result.Message, StatusCodes.Status200OK));
+            }).RequireAuthorization("UserOrAdmin")
+              .WithTags("Order");
 
             return group;
             }
