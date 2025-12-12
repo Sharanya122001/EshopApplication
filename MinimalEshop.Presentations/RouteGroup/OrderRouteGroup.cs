@@ -28,11 +28,12 @@ namespace MinimalEshop.Presentation.RouteGroup
             .WithTags("Order");
 
                
-            group.MapPost("/payment", async (PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory) =>
+            group.MapPost("/payment", async (PaymentRequest request,IHttpClientFactory httpClientFactory,ILoggerFactory loggerFactory, OrderService orderService, ClaimsPrincipal user) =>
             {
                 var logger = loggerFactory.CreateLogger("PaymentProcess");
                 logger.LogInformation("Payment processing started");
 
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
                 var method = request.PaymentMethod.Trim().ToLower();
 
                 if (method == "cod" || method == "cash on delivery")
@@ -64,7 +65,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(new { message = "Stripe PaymentIntent creation failed" });
 
                 var createResult = await createResponse.Content.ReadFromJsonAsync<CreatePaymentIntentResult>();
-
+                
                 var confirmResponse = await client.PostAsJsonAsync("/confirm-payment-intent", new//confrims the paymentintent
                     {
                     PaymentIntentId = createResult.paymentIntentId,
@@ -75,7 +76,12 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(new { message = "Stripe PaymentIntent confirmation failed" });
                 //reads the confirmed paymentintent result
                 var confirmResult = await confirmResponse.Content.ReadFromJsonAsync<ConfirmPaymentIntentResult>();
+                var paymentMethodEnum = Enum.Parse<MinimalEshop.Application.Domain.Enums.PaymentMethod>(request.PaymentMethod, true);
 
+                var dbResult = await orderService.ProcessPaymentAsync(userId, paymentMethodEnum);
+
+                if (!dbResult.Success)
+                    return Results.BadRequest(new { message = dbResult.Message });
                 return Results.Ok(new
                     {
                     message = "Payment successful",

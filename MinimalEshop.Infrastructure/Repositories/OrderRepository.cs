@@ -3,6 +3,7 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Infrastructure.Context;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Repositories
@@ -25,6 +26,14 @@ namespace MinimalEshop.Infrastructure.Repositories
         public async Task SaveOrderAsync(Order order, List<OrderItem> items)
             {
             await _context.Orders.AddAsync(order);
+            await _context.SaveChangesAsync();
+
+            foreach (var item in items)
+                {
+                item.OrderId = order.OrderId;
+                item.OrderItemId = ObjectId.GenerateNewId().ToString();
+                }
+
             await _context.OrderItems.AddRangeAsync(items);
             await _context.SaveChangesAsync();
             }

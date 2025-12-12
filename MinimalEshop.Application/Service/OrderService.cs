@@ -82,12 +82,15 @@ namespace MinimalEshop.Application.Service
 
         public async Task<PaymentResult> ProcessPaymentAsync(string userId, PaymentMethod paymentMethod)
             {
-            if (paymentMethod < PaymentMethod.UPI || paymentMethod > PaymentMethod.NetBanking)
+            if (!Enum.IsDefined(typeof(PaymentMethod), paymentMethod) || paymentMethod == PaymentMethod.None)
+                {
                 return new PaymentResult
                     {
                     Success = false,
-                    Message = "Invalid payment method. Please choose a valid one."
+                    Message = "Invalid payment method."
                     };
+                }
+
 
             var order = await _context.GetLatestOrderAsync(userId);
 
