@@ -4,9 +4,9 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Application.Domain.Entities
-    {
+{
     public class OrderItem
-        {
+    {
         [Key]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -20,6 +20,6 @@ namespace MinimalEshop.Application.Domain.Entities
         public PaymentMethod PaymentMethod { get; set; }
         public PaymentStatus paymentStatus { get; set; }
         public OrderStatus OrderStatus { get; set; }
-        }
-
     }
+
+}

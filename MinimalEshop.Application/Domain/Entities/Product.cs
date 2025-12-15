@@ -3,9 +3,9 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Application.Domain.Entities
-    {
+{
     public class Product
-        {
+    {
         [Key]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -20,5 +20,5 @@ namespace MinimalEshop.Application.Domain.Entities
         public DateTime Addedon { get; set; }
         [BsonElement("CategoryId")]
         public int CategoryId { get; set; }
-        }
     }
+}

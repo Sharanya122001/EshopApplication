@@ -138,9 +138,9 @@ using MinimalEshop.Application.Service;
 using Moq;
 
 namespace MinimalEshop.Application.Test.Services
-    {
+{
     public class CartServiceTests
-        {
+    {
         private readonly CartService _cartService;
         private readonly Mock<IProduct> _productRepositoryMock;
         private readonly Mock<ICart> _cartRepositoryMock;
@@ -148,7 +148,7 @@ namespace MinimalEshop.Application.Test.Services
         private readonly IFixture _fixture;
 
         public CartServiceTests()
-            {
+        {
             _fixture = new Fixture();
 
             _fixture.Customize<Product>(c => c
@@ -166,11 +166,11 @@ namespace MinimalEshop.Application.Test.Services
                 _productRepositoryMock.Object,
                 _cacheMock.Object
             );
-            }
+        }
 
         [Fact]
         public async Task AddToCartAsync_Should_CallRepositoryAndReturnTrue()
-            {
+        {
             var idempotencyKey = "key_123";
             var productId = _fixture.Create<string>();
             var userId = _fixture.Create<string>();
@@ -206,11 +206,11 @@ namespace MinimalEshop.Application.Test.Services
 
             _cacheMock.Verify(c => c.SetAsync(idempotencyKey, true), Times.Once);
             _cacheMock.Verify(c => c.RemoveAsync($"cart_{userId}"), Times.Once);
-            }
+        }
 
         [Fact]
         public async Task AddToCartAsync_Should_ReturnFalse_WhenProductNotFound()
-            {
+        {
             string idempotencyKey = "key_123";
             string productId = "invalid";
             string userId = "user_1";
@@ -226,11 +226,11 @@ namespace MinimalEshop.Application.Test.Services
 
             Assert.False(result);
             _cacheMock.Verify(c => c.SetAsync(idempotencyKey, false), Times.Once);
-            }
+        }
 
         [Fact]
         public async Task AddToCartAsync_Should_ReturnCachedValue_WhenIdempotencyAlreadyExists()
-            {
+        {
             string idempotencyKey = "key_123";
 
             _cacheMock.Setup(c => c.GetAsync<bool?>(idempotencyKey))
@@ -242,12 +242,12 @@ namespace MinimalEshop.Application.Test.Services
 
             _productRepositoryMock.Verify(p => p.GetProductByIdAsync(It.IsAny<string>()), Times.Never);
             _cartRepositoryMock.Verify(c => c.AddToCartAsync(It.IsAny<Cart>()), Times.Never);
-            }
+        }
 
 
         [Fact]
         public async Task GetCartByUserIdAsync_Should_Return_Cart()
-            {
+        {
             var userId = _fixture.Create<string>();
 
             var cart = _fixture.Build<Cart>()
@@ -264,11 +264,11 @@ namespace MinimalEshop.Application.Test.Services
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.UserId);
-            }
+        }
 
         [Fact]
         public async Task DeleteProductFromCartAsync_ShouldReturnTrue_WhenDeleted()
-            {
+        {
             var userId = "user123";
             var productId = "p1";
 
@@ -280,11 +280,11 @@ namespace MinimalEshop.Application.Test.Services
 
             Assert.True(result);
             _cacheMock.Verify(c => c.RemoveAsync($"cart_{userId}"), Times.Once);
-            }
+        }
 
         [Fact]
         public async Task DeleteProductFromCartAsync_ShouldReturnFalse_WhenDeleteFails()
-            {
+        {
             var userId = "user123";
             var productId = "p1";
 
@@ -295,7 +295,7 @@ namespace MinimalEshop.Application.Test.Services
             var result = await _cartService.DeleteProductFromCartAsync(userId, productId, 1);
 
             Assert.False(result);
-            }
         }
     }
+}
 

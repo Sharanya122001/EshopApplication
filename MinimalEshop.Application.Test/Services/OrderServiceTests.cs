@@ -90,32 +90,26 @@ using MinimalEshop.Application.Domain.Enums;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
-using MinimalEshop.Presentation.Responses;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace MinimalEshop.Tests.Service
-    {
+{
     public class OrderServiceTests
-        {
+    {
         private readonly Mock<IOrder> _mockOrderRepo;
         private readonly OrderService _orderService;
         private readonly IFixture _fixture;
 
         public OrderServiceTests()
-            {
+        {
             _fixture = new Fixture();
             _mockOrderRepo = new Mock<IOrder>();
             _orderService = new OrderService(_mockOrderRepo.Object);
-            }
+        }
 
         [Fact]
         public async Task CheckOutAsync_ShouldReturnOrderDto_WhenCartHasItems()
-            {
+        {
 
             var userId = _fixture.Create<string>();
 
@@ -149,7 +143,7 @@ namespace MinimalEshop.Tests.Service
                 .Setup(r => r.ClearCartAsync(It.IsAny<List<Cart>>()))
                 .Returns(Task.CompletedTask);
 
- 
+
             var result = await _orderService.CheckOutAsync(userId);
 
             Assert.True(result.Success);
@@ -163,22 +157,22 @@ namespace MinimalEshop.Tests.Service
 
             _mockOrderRepo.Verify(r => r.SaveOrderAsync(It.IsAny<Order>(), It.IsAny<List<OrderItem>>()), Times.Once);
             _mockOrderRepo.Verify(r => r.ClearCartAsync(It.IsAny<List<Cart>>()), Times.Once);
-            }
+        }
 
         [Fact]
         public async Task ProcessPaymentAsync_ShouldReturnSuccess_WhenPaymentProcessed()
-            {
+        {
 
             var userId = _fixture.Create<string>();
             var paymentMethod = PaymentMethod.UPI;
 
             var order = new Order
-                {
+            {
                 OrderId = _fixture.Create<string>(),
                 UserId = userId,
                 Name = "Test Order",
                 Status = "Pending"
-                };
+            };
 
             _mockOrderRepo
                 .Setup(r => r.GetLatestOrderAsync(userId))
@@ -199,15 +193,15 @@ namespace MinimalEshop.Tests.Service
             var updatedOrder = result.Data as Order;
             Assert.Equal(PaymentStatus.Success, updatedOrder.PaymentStatus);
             Assert.Equal("Completed", updatedOrder.Status);
-            }
+        }
 
         [Fact]
         public async Task GetOrderDetailsAsync_ShouldReturnOrderDetails_WhenOrderExists()
-            {
+        {
             var userId = _fixture.Create<string>();
 
             var order = new Order
-                {
+            {
                 OrderId = _fixture.Create<string>(),
                 UserId = userId,
                 Name = "Test Order",
@@ -216,7 +210,7 @@ namespace MinimalEshop.Tests.Service
                 Status = "Pending",
                 PaymentMethod = PaymentMethod.UPI,
                 PaymentStatus = PaymentStatus.Pending
-                };
+            };
 
             var items = new List<OrderItem>
             {
@@ -243,7 +237,7 @@ namespace MinimalEshop.Tests.Service
             Assert.Equal(userId, orderDto.UserId);
             Assert.Equal(1, orderDto.Items.Count);
             Assert.Equal(items[0].ProductId, orderDto.Items[0].ProductId);
-            }
         }
     }
+}
 

@@ -4,10 +4,10 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Application.Domain.Entities
-    {
+{
 
     public class Order
-        {
+    {
         [Key]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -24,20 +24,20 @@ namespace MinimalEshop.Application.Domain.Entities
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public PaymentMethod PaymentMethod { get; set; }
         public void ProcessPayment(PaymentMethod method)
-            {
+        {
             PaymentMethod = method;
 
             if (method == PaymentMethod.CashOnDelivery)
-                {
+            {
                 PaymentStatus = PaymentStatus.Pending;
                 Status = "Pending";
-                }
+            }
             else
-                {
+            {
                 PaymentStatus = PaymentStatus.Success;
                 Status = "Completed";
-                }
             }
-
         }
+
     }
+}

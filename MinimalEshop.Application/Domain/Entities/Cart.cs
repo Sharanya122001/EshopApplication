@@ -3,9 +3,9 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Application.Domain.Entities
-    {
+{
     public class Cart
-        {
+    {
         [Key]
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -14,8 +14,8 @@ namespace MinimalEshop.Application.Domain.Entities
         public List<CartItem> Products { get; set; } = new();
 
         public decimal GetTotalPrice()
-            {
+        {
             return Products.Sum(p => p.Price * p.Quantity);
-            }
         }
     }
+}

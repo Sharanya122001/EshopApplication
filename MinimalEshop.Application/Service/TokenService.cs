@@ -7,13 +7,13 @@ using System.Security.Claims;
 using System.Text;
 
 namespace MinimalEshop.Application.Service
-    {
+{
     public class TokenService : ITokenService
-        {
+    {
         private readonly JwtSettings _jwtSettings;
         private readonly byte[] _keyBytes;
         public TokenService(IConfiguration configuration)
-            {
+        {
             _jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
                            ?? throw new ArgumentException("JWT configuration section is missing.");
 
@@ -21,10 +21,10 @@ namespace MinimalEshop.Application.Service
                 throw new ArgumentException("JWT Key is missing in configuration.");
 
             _keyBytes = Encoding.UTF8.GetBytes(_jwtSettings.Key);
-            }
+        }
 
         public string GenerateToken(string userId, string username, string role)
-            {
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(_keyBytes);
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -46,6 +46,6 @@ namespace MinimalEshop.Application.Service
             );
 
             return tokenHandler.WriteToken(token);
-            }
         }
     }
+}

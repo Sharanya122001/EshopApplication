@@ -2,11 +2,11 @@
 using MinimalEshop.Application.DTO;
 
 namespace MinimalEshop.Application.Validator
-    {
+{
     public class UserDtoValidator : AbstractValidator<UserDto>
-        {
+    {
         public UserDtoValidator()
-            {
+        {
             RuleFor(x => x.Username)
                 .NotEmpty().WithMessage("Username is Required.");
 
@@ -29,6 +29,6 @@ namespace MinimalEshop.Application.Validator
                 (role.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
                  role.Equals("user", StringComparison.OrdinalIgnoreCase))).WithMessage("Role must be either 'Admin' or 'User' (case insensitive).");
 
-            }
         }
     }
+}

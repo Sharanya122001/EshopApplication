@@ -5,39 +5,39 @@ using MinimalEshop.Infrastructure.Context;
 using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Repositories
-    {
+{
     public class ProductRepository : IProduct
-        {
+    {
         private readonly MongoDbContext _context;
 
         public ProductRepository(MongoDbContext context)
-            {
+        {
             _context = context;
-            }
+        }
 
         public async Task<List<Product>> GetAllAsync()
-            {
+        {
             return await _context.Products.ToListAsync();
-            }
+        }
 
         public async Task<List<Product>> SearchAsync(string keyword)
-            {
+        {
 
             return await _context.Products
                  .Where(p => p.Name.ToLower().Contains(keyword.ToLower()))
                  .ToListAsync();
-            }
+        }
 
 
         public async Task<Product> AddAsync(Product product)
-            {
+        {
             await _context.AddAsync(product);
             await _context.SaveChangesAsync();
             return product;
-            }
+        }
 
         public async Task<bool> UpdateAsync(Product product)
-            {
+        {
             var existingProduct = await _context.Products
             .FirstOrDefaultAsync(p => p.ProductId == product.ProductId);
 
@@ -48,10 +48,10 @@ namespace MinimalEshop.Infrastructure.Repositories
             await _context.SaveChangesAsync();
 
             return true;
-            }
+        }
 
         public async Task<bool> DeleteAsync(string ProductId)
-            {
+        {
             var product = await _context.Products
             .FirstOrDefaultAsync(p => p.ProductId == ProductId);
 
@@ -61,10 +61,10 @@ namespace MinimalEshop.Infrastructure.Repositories
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return true;
-            }
+        }
         public async Task<Product?> GetProductByIdAsync(string productId)
-            {
+        {
             return await _context.Products.Where(p => p.ProductId == productId).FirstOrDefaultAsync();
-            }
         }
     }
+}

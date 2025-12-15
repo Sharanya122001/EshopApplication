@@ -4,26 +4,25 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace MinimalEshop.Presentation.RouteGroup
-    {
+{
     public static class CartRouteGroup
-        {
+    {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
-            {
-            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey,[FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+        {
+            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey, [FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("POST/Cart/AddToCart called to add {ProductId} to cart", cartDto.ProductId);
 
                 var validationResult = await validator.ValidateAsync(cartDto);
                 if (!validationResult.IsValid)
-                    {
+                {
                     var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
-                    }
+                }
 
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -32,7 +31,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.Json(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized), statusCode: StatusCodes.Status401Unauthorized);
 
                 var cart = new Cart
-                    {
+                {
                     UserId = userId,
                     Products = new List<CartItem>
                     {
@@ -42,7 +41,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                            Quantity = cartDto.Quantity
                        }
                    }
-                    };
+                };
 
                 var created = await _service.AddToCartAsync(
                     idempotencyKey,
@@ -66,17 +65,17 @@ namespace MinimalEshop.Presentation.RouteGroup
                 logger.LogInformation("DELETE/Cart/product called to delete {ProductId} from cart", productId);
 
                 var dto = new CartDto
-                    {
+                {
                     ProductId = productId,
                     Quantity = quantity ?? 1
-                    };
+                };
 
                 var validationResult = await validator.ValidateAsync(dto);
                 if (!validationResult.IsValid)
-                    {
+                {
                     var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
-                    }
+                }
 
                 var userId = httpContext.User.FindFirst("id")?.Value
                              ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -122,7 +121,7 @@ namespace MinimalEshop.Presentation.RouteGroup
               .WithTags("Cart");
 
             return group;
-            }
-
         }
+
     }
+}

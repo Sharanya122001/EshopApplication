@@ -4,14 +4,13 @@ using MinimalEshop.Application.Domain.Entities;
 using MinimalEshop.Application.DTO;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Presentation.Responses;
-using System.ComponentModel.DataAnnotations;
 
 namespace MinimalEshop.Presentation.RouteGroup
-    {
+{
     public static class UserRouteGroup
-        {
+    {
         public static RouteGroupBuilder UserAPI(this RouteGroupBuilder group)
-            {
+        {
             group.MapPost("/Register", async ([FromServices] UserService _service, [FromServices] IValidator<UserDto> validator, [FromBody] UserDto userDto, ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("UserRouteLogger");
@@ -22,18 +21,18 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var validationResult = await validator.ValidateAsync(userDto);
                 if (!validationResult.IsValid)
-                    {
+                {
                     var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
-                    }
+                }
 
                 var user = new User
-                    {
+                {
                     Username = userDto.Username,
                     Password = userDto.Password,
                     Email = userDto.Email,
                     Role = userDto.Role
-                    };
+                };
 
                 var registered = await _service.RegisterUserAsync(user.Username, user.Password, user.Email, user.Role);
 
@@ -57,10 +56,10 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var validationResult = await validator.ValidateAsync(loginDto);
                 if (!validationResult.IsValid)
-                    {
+                {
                     var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
-                    }
+                }
 
                 var token = await _service.LoginAsync(loginDto.Username, loginDto.Password);
 
@@ -75,6 +74,6 @@ namespace MinimalEshop.Presentation.RouteGroup
             .WithTags("User");
 
             return group;
-            }
         }
     }
+}

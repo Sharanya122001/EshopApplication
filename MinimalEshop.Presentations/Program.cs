@@ -7,29 +7,24 @@ using Microsoft.OpenApi.Models;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Application.Validator;
-using MinimalEshop.Infrastructure.Context;
 using MinimalEshop.Infrastructure.Data;
 using MinimalEshop.Infrastructure.Repositories;
 using MinimalEshop.Presentation;
 using MinimalEshop.Presentation.Responses;
 using MinimalEshop.Presentation.RouteGroup;
 using MongoDB.Driver;
-using MongoFramework;
+using Serilog;
 using System.Reflection;
 using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using Serilog;
-using Serilog.AspNetCore;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 
 
 namespace Presentation
-    {
+{
     public class Program
-        {
+    {
         public static void Main(string[] args)
-            {
+        {
             var builder = WebApplication.CreateBuilder(args);
 
             //registering the httpclient i.e., to call stripe api
@@ -99,12 +94,12 @@ namespace Presentation
                 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
 
                 if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.Key))
-                    {
+                {
                     throw new InvalidOperationException("JWT settings are not configured. Ensure 'Jwt' section exists with a non-empty 'Key'.");
-                    }
+                }
 
                 options.TokenValidationParameters = new TokenValidationParameters
-                    {
+                {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings.Key)
@@ -115,7 +110,7 @@ namespace Presentation
                     ValidAudience = jwtSettings.Audience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30)
-                    };
+                };
             });
 
             builder.Services.AddAuthorization(options =>
@@ -132,13 +127,13 @@ namespace Presentation
 
                 options.IncludeXmlComments(xmlPath);
                 options.SwaggerDoc("v1", new OpenApiInfo
-                    {
+                {
                     Title = "MinimalEshop API",
                     Version = "v1"
-                    });
+                });
 
                 var jwtSecurityScheme = new OpenApiSecurityScheme
-                    {
+                {
                     Scheme = "bearer",
                     BearerFormat = "JWT",
                     Name = "Authorization",
@@ -146,11 +141,11 @@ namespace Presentation
                     Type = SecuritySchemeType.Http,
                     Description = "Enter 'Bearer' [space] and then your valid token.",
                     Reference = new OpenApiReference
-                        {
+                    {
                         Id = JwtBearerDefaults.AuthenticationScheme,
                         Type = ReferenceType.SecurityScheme
-                        }
-                    };
+                    }
+                };
 
                 options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -160,10 +155,11 @@ namespace Presentation
             });
             //registered redis cache
             builder.Services.AddStackExchangeRedisCache(
-                Options => {
+                Options =>
+                {
                     Options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs";
                     Options.InstanceName = "MinimalEshopCacheInstance";
-                    });
+                });
             var app = builder.Build();
 
             // Global exception handler
@@ -189,10 +185,10 @@ namespace Presentation
             });
 
             if (app.Environment.IsDevelopment())
-                {
+            {
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                }
+            }
 
             app.UseHttpsRedirection();
 
@@ -203,24 +199,24 @@ namespace Presentation
                 var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
 
                 if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-                    {
+                {
 
                     logger.LogWarning("Forbidden (403): User tried to access {Path} but does not have permission.",
                        context.Request.Path);
 
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "You are not authorized to access this resource.", StatusCodes.Status403Forbidden));
-                    }
+                }
 
                 else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                    {
+                {
 
                     logger.LogWarning("Unauthorized (401): User attempted to access {Path} without authentication.",
                        context.Request.Path);
 
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsJsonAsync(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized));
-                    }
+                }
             });
 
             app.UseSerilogRequestLogging();
@@ -234,7 +230,7 @@ namespace Presentation
 
             app.Run();
 
-            }
         }
     }
+}
 
