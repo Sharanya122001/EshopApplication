@@ -2,7 +2,7 @@
 
 namespace MinimalEshop.Application.Interface
 {
-    public interface IUser
+    public interface IUserRepo
     {
         Task<User> RegisterAsync(User user);
         Task<User?> GetUserByUsernameAsync(string username);

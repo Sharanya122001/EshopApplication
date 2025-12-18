@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Repositories
 {
-    public class UserRepository : IUser
+    public class UserRepository : IUserRepo
     {
         private readonly MongoDbContext _context;
 

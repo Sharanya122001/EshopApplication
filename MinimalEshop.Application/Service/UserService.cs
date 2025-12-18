@@ -5,9 +5,9 @@ namespace MinimalEshop.Application.Service
 {
     public class UserService
     {
-        private readonly IUser _user;
+        private readonly IUserRepo _user;
         private readonly ITokenService _jwtService;
-        public UserService(IUser user, ITokenService jwtService)
+        public UserService(IUserRepo user, ITokenService jwtService)
         {
             _user = user;
             _jwtService = jwtService;

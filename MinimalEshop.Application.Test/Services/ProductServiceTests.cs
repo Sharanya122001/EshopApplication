@@ -131,7 +131,7 @@ namespace MinimalEshop.Application.Test.Services
     {
         private readonly IFixture _fixture;
         private readonly ProductService _productService;
-        private readonly Mock<IProduct> _productRepositoryMock;
+        private readonly Mock<IProductRepo> _productRepositoryMock;
         private readonly Mock<ICacheService> _cacheMock;
 
         public ProductServiceTests()
@@ -143,7 +143,7 @@ namespace MinimalEshop.Application.Test.Services
                 .With(p => p.Name, "Test Product")
                 .With(p => p.Price, 100));
 
-            _productRepositoryMock = new Mock<IProduct>();
+            _productRepositoryMock = new Mock<IProductRepo>();
             _cacheMock = new Mock<ICacheService>();
 
             _productService = new ProductService(

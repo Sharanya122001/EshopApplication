@@ -2,7 +2,7 @@
 
 namespace MinimalEshop.Application.Interface
 {
-    public interface ICart
+    public interface ICartRepo
     {
         Task<bool> AddToCartAsync(Cart cart);
         Task<bool> DeleteAsync(string userId, string productId, int quantity);

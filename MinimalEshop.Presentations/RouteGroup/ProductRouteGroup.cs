@@ -12,34 +12,49 @@ namespace MinimalEshop.Presentation.RouteGroup
         public static RouteGroupBuilder ProductAPI(this RouteGroupBuilder group)
         {
 
-            group.MapGet("/", async ([FromServices] ProductService _service, ILoggerFactory loggerFactory) =>
+            group.MapGet("/", async (
+                [FromServices] ProductService _productService, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("GET/ Product Called");
 
-                var product = await _service.GetProductAsync();
+                var product = await _productService.GetProductAsync();
 
                 logger.LogInformation("Retrieved {Count} products", product.Count());
 
-                return Results.Ok(Result.Ok(product, null, StatusCodes.Status200OK));
+                return Results.Ok(Result.Ok(product, "Products retrieved successfully", StatusCodes.Status200OK));
+
             })
             .RequireAuthorization("UserOrAdmin")
+            .Produces<List<Product>>(StatusCodes.Status200OK)
             .WithTags("Product");
 
-            group.MapGet("/search", async ([FromServices] ProductService _service, [FromQuery] string query, ILoggerFactory loggerFactory) =>
+            group.MapGet("/search", async (
+                [FromServices] ProductService _productService,
+                [FromQuery] string query,
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("GET /products/search called with query = {Query}", query);
 
-                var results = await _service.SearchProductsAsync(query);
+                var results = await _productService.SearchProductsAsync(query);
 
                 logger.LogInformation("Search returned {Count} items", results.Count());
 
                 return Results.Ok(Result.Ok(results, null, StatusCodes.Status200OK));
-            }).RequireAuthorization("UserOrAdmin")
+            })
+            .RequireAuthorization("UserOrAdmin")
+            .Produces<List<Product>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
-            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey, [FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async (
+                [FromHeader(Name = "Idempotency-Key")] string idempotencyKey, 
+                [FromServices] ProductService _productService,
+                [FromBody] ProductDto productDto,
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("POST /products called to add product {Name}", productDto.Name);
@@ -52,15 +67,23 @@ namespace MinimalEshop.Presentation.RouteGroup
                     CategoryId = productDto.CategoryId,
                     Addedon = productDto.Addedon
                 };
-                var created = await _service.CreateProductAsync(idempotencyKey, product);
+                var created = await _productService.CreateProductAsync(idempotencyKey, product);
 
                 logger.LogInformation("Product created Id = {ProductId}", created.ProductId);
 
                 return Results.Ok(Result.Ok(created, "Product created", StatusCodes.Status201Created));
-            }).RequireAuthorization("AdminOnly")
+            })
+            .RequireAuthorization("AdminOnly")
+            .Produces<Product>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
-            group.MapPut("/", async ([FromServices] ProductService _service, [FromBody] ProductDto productDto, ILoggerFactory loggerFactory) =>
+            group.MapPut("/", async (
+                [FromServices] ProductService _productService, 
+                [FromBody] ProductDto productDto,
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("PUT /products/update called for ProductId = {ProductId}", productDto.ProductId);
@@ -75,15 +98,24 @@ namespace MinimalEshop.Presentation.RouteGroup
                     Addedon = productDto.Addedon
                 };
 
-                var updated = await _service.UpdateProductAsync(product);
+                var updated = await _productService.UpdateProductAsync(product);
 
                 logger.LogInformation(updated ? "Product {ProductId} updated successfully" : "Failed to update Product {ProductId}", productDto.ProductId);
 
                 return Results.Ok(Result.Ok(updated, updated ? "Product updated" : "Product update failed", StatusCodes.Status200OK));
-            }).RequireAuthorization("AdminOnly")
+            })
+            .RequireAuthorization("AdminOnly")
+            .Produces<bool>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
-            group.MapDelete("/", async ([FromServices] ProductService _service, [FromServices] IValidator<ProductDto> validator, [FromQuery] string ProductId, ILoggerFactory loggerFactory) =>
+            group.MapDelete("/", async (
+                [FromServices] ProductService _productService, 
+                [FromServices] IValidator<ProductDto> validator, 
+                [FromQuery] string ProductId, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("ProductRouteLogger");
                 logger.LogInformation("DELETE/product/delete called for the ProductId={ProductId}", ProductId);
@@ -100,12 +132,17 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
                 }
 
-                var deleted = await _service.DeleteProductAsync(ProductId);
+                var deleted = await _productService.DeleteProductAsync(ProductId);
 
                 logger.LogInformation(deleted ? "Deleted product {ProductId}" : "Failed to Delete {ProductId}", ProductId);
 
                 return Results.Ok(Result.Ok(deleted, deleted ? "Product deleted" : "Product delete failed", StatusCodes.Status200OK));
-            }).RequireAuthorization("AdminOnly")
+            })
+            .RequireAuthorization("AdminOnly")
+            .Produces<bool>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
             return group;

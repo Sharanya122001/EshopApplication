@@ -2,7 +2,7 @@
 
 namespace MinimalEshop.Application.Interface
 {
-    public interface IProduct
+    public interface IProductRepo
     {
         Task<List<Product>> GetAllAsync();
         Task<List<Product>> SearchAsync(string keyword);

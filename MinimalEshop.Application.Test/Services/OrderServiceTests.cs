@@ -96,14 +96,14 @@ namespace MinimalEshop.Tests.Service
 {
     public class OrderServiceTests
     {
-        private readonly Mock<IOrder> _mockOrderRepo;
+        private readonly Mock<IOrderRepo> _mockOrderRepo;
         private readonly OrderService _orderService;
         private readonly IFixture _fixture;
 
         public OrderServiceTests()
         {
             _fixture = new Fixture();
-            _mockOrderRepo = new Mock<IOrder>();
+            _mockOrderRepo = new Mock<IOrderRepo>();
             _orderService = new OrderService(_mockOrderRepo.Object);
         }
 

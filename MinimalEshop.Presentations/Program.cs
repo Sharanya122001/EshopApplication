@@ -1,3 +1,4 @@
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,11 @@ namespace Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            //string stripeApiUrl = Environment.GetEnvironmentVariable("STRIPE_API_URL") ?? "http://localhost:5001/api/payment";
+            builder.Services.AddHttpClient("StripeDemo", c =>
+            {
+                c.BaseAddress = new Uri("https://localhost:44325/");
+            });
 
             //registering the httpclient i.e., to call stripe api
             builder.Services.AddHttpClient("StripeDemo", c =>
@@ -61,10 +67,10 @@ namespace Presentation
                 options.UseMongoDB("mongodb+srv://Sharanya:Sharanya@cluster0.m2cqpvh.mongodb.net/", "MinimalEshopDB");//usemongo takes 2 arguments one is connectionstring and second is database name
             });
 
-            builder.Services.AddScoped<IUser, UserRepository>();
-            builder.Services.AddScoped<IProduct, ProductRepository>();
-            builder.Services.AddScoped<IOrder, OrderRepository>();
-            builder.Services.AddScoped<ICart, CartRepository>();
+            builder.Services.AddScoped<IUserRepo, UserRepository>();
+            builder.Services.AddScoped<IProductRepo, ProductRepository>();
+            builder.Services.AddScoped<IOrderRepo, OrderRepository>();
+            builder.Services.AddScoped<ICartRepo, CartRepository>();
 
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<ProductService>();
@@ -72,14 +78,9 @@ namespace Presentation
             builder.Services.AddScoped<CartService>();
             builder.Services.AddScoped<CategoryService>();
 
-            builder.Services.AddControllers()
-              .AddFluentValidation(fv =>
-              {
-                  fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>();
-                  fv.RegisterValidatorsFromAssemblyContaining<LoginDtoValidation>();
-                  fv.RegisterValidatorsFromAssemblyContaining<ProductDtoValidator>();
-                  fv.RegisterValidatorsFromAssemblyContaining<CartDtoValidator>();
-              });
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ICacheService, CacheService>();
@@ -154,74 +155,29 @@ namespace Presentation
                 });
             });
             //registered redis cache
-            builder.Services.AddStackExchangeRedisCache(
-                Options =>
-                {
-                    Options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs";
-                    Options.InstanceName = "MinimalEshopCacheInstance";
-                });
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration["Redis:Configuration"];
+                options.InstanceName = builder.Configuration["Redis:InstanceName"];
+            });
+
             var app = builder.Build();
 
-            // Global exception handler
-            app.UseExceptionHandler(errApp =>
-            {
-                errApp.Run(async context =>
-                {
-                    context.Response.ContentType = "application/json";
 
-                    var feature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
-                    var ex = feature?.Error;
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseSwaggerUI();
+            //}
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-                    //added logging
-                    Log.Error(ex,
-                        "Unhandled exception occurred at path: {Path}. Message: {Message}",
-                        feature?.Path,
-                        ex?.Message);
-                    var result = Result.Fail(new[] { ex?.Message ?? "An unexpected error occurred." }, "An error occurred while processing your request.", 500);
-
-                    context.Response.StatusCode = 500;
-                    await context.Response.WriteAsJsonAsync(result);
-                });
-            });
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.Use(async (context, next) =>
-            {
-            https://localhost:44310/orders/paymentprocess-redirect?orderId=692979f4f475f32dbd5f3004&amount=10000
-                await next();
-                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-
-                if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-                {
-
-                    logger.LogWarning("Forbidden (403): User tried to access {Path} but does not have permission.",
-                       context.Request.Path);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsJsonAsync(Result.Fail(null, "You are not authorized to access this resource.", StatusCodes.Status403Forbidden));
-                }
-
-                else if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                {
-
-                    logger.LogWarning("Unauthorized (401): User attempted to access {Path} without authentication.",
-                       context.Request.Path);
-
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsJsonAsync(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized));
-                }
-            });
+            //app.UseHttpsRedirection();
 
             app.UseSerilogRequestLogging();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<AuthResponseMiddleware>();
 
             app.MapGroup("/cart").CartAPI();
             app.MapGroup("/products").ProductAPI();

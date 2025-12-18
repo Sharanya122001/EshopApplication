@@ -2,7 +2,7 @@
 
 namespace MinimalEshop.Application.Interface
 {
-    public interface IOrder
+    public interface IOrderRepo
     {
         Task SaveOrderAsync(Order order, List<OrderItem> items);
         Task<List<Cart>> GetUserCartAsync(string userId);

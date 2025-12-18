@@ -11,7 +11,11 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder UserAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/Register", async ([FromServices] UserService _service, [FromServices] IValidator<UserDto> validator, [FromBody] UserDto userDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/Register", async (
+                [FromServices] UserService _userService,
+                [FromServices] IValidator<UserDto> validator,
+                [FromBody] UserDto userDto, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("UserRouteLogger");
                 logger.LogInformation("POST/ Register User");
@@ -34,7 +38,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     Role = userDto.Role
                 };
 
-                var registered = await _service.RegisterUserAsync(user.Username, user.Password, user.Email, user.Role);
+                var registered = await _userService.RegisterUserAsync(user.Username, user.Password, user.Email, user.Role);
 
                 if (registered != null)
                     logger.LogInformation("User registered successfully.");
@@ -44,9 +48,15 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 return Results.BadRequest(Result.Fail(null, "User registration failed.", StatusCodes.Status400BadRequest));
             })
+            .Produces<Result<User>>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
             .WithTags("User");
 
-            group.MapPost("/Login", async ([FromServices] UserService _service, [FromServices] IValidator<LoginDto> validator, [FromBody] LoginDto loginDto, ILoggerFactory loggerFactory) =>
+            group.MapPost("/Login", async (
+                [FromServices] UserService _userService,
+                [FromServices] IValidator<LoginDto> validator, 
+                [FromBody] LoginDto loginDto, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("UserRouteLogger");
                 logger.LogInformation("POST/ Login User");
@@ -61,7 +71,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.BadRequest(Result.Fail(null, errors, StatusCodes.Status400BadRequest));
                 }
 
-                var token = await _service.LoginAsync(loginDto.Username, loginDto.Password);
+                var token = await _userService.LoginAsync(loginDto.Username, loginDto.Password);
 
                 if (token == null)
                     return Results.Json(Result.Fail(null, "Invalid username or password.", StatusCodes.Status401Unauthorized), statusCode: StatusCodes.Status401Unauthorized);
@@ -71,6 +81,9 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(new { Token = token }, null, StatusCodes.Status200OK));
 
             })
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
             .WithTags("User");
 
             return group;

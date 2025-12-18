@@ -5,9 +5,9 @@ namespace MinimalEshop.Application.Service
 {
     public class ProductService
     {
-        private readonly IProduct _product;
+        private readonly IProductRepo _product;
         private readonly ICacheService _cache;
-        public ProductService(IProduct product, ICacheService cache)
+        public ProductService(IProductRepo product, ICacheService cache)
         {
             _product = product;
             _cache = cache;

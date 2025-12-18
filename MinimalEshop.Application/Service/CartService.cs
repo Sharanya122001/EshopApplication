@@ -5,11 +5,11 @@ namespace MinimalEshop.Application.Service
 {
     public class CartService
     {
-        private readonly ICart _cart;
-        private readonly IProduct _product;
+        private readonly ICartRepo _cart;
+        private readonly IProductRepo _product;
         private readonly ICacheService _cache;
 
-        public CartService(ICart cart, IProduct product, ICacheService cache)
+        public CartService(ICartRepo cart, IProductRepo product, ICacheService cache)
         {
             _cart = cart;
             _product = product;

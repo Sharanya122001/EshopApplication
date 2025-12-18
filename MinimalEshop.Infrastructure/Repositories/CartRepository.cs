@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Repositories
 {
-    public class CartRepository : ICart
+    public class CartRepository : ICartRepo
     {
         private readonly MongoDbContext _context;
 
@@ -68,6 +68,12 @@ namespace MinimalEshop.Infrastructure.Repositories
 
         public async Task<Cart?> GetCartByUserIdAsync(string userId)
         {
+
+
+            //_context.Carts
+            //    .Include(c => c.Products)
+            //    .Where(c => c.UserId.ToString() == userId)
+
             return await _context.Carts.Where(c => c.UserId.ToString() == userId).FirstOrDefaultAsync();
         }
 

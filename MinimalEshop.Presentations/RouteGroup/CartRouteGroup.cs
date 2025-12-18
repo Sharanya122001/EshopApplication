@@ -12,7 +12,13 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder CartAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/", async ([FromHeader(Name = "Idempotency-Key")] string idempotencyKey, [FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromBody] CartDto cartDto, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+            group.MapPost("/", async (
+                [FromHeader(Name = "Idempotency-Key")] string idempotencyKey, 
+                [FromServices] CartService _cartService, 
+                [FromServices] IValidator<CartDto> validator, 
+                [FromBody] CartDto cartDto, 
+                HttpContext httpContext, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("POST/Cart/AddToCart called to add {ProductId} to cart", cartDto.ProductId);
@@ -30,20 +36,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (string.IsNullOrEmpty(userId))
                     return Results.Json(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized), statusCode: StatusCodes.Status401Unauthorized);
 
-                var cart = new Cart
-                {
-                    UserId = userId,
-                    Products = new List<CartItem>
-                    {
-                       new CartItem
-                       {
-                           ProductId = cartDto.ProductId,
-                           Quantity = cartDto.Quantity
-                       }
-                   }
-                };
-
-                var created = await _service.AddToCartAsync(
+                var created = await _cartService.AddToCartAsync(
                     idempotencyKey,
                     cartDto.ProductId,
                     cartDto.Quantity,
@@ -56,10 +49,21 @@ namespace MinimalEshop.Presentation.RouteGroup
                     ? Results.Ok(Result.Ok(new { message = "Product added to cart successfully." }, null, StatusCodes.Status200OK))
                     : Results.BadRequest(Result.Fail(null, "Failed to add product to cart.", StatusCodes.Status400BadRequest));
 
-            }).RequireAuthorization("UserOrAdmin")
+            })
+            .RequireAuthorization("UserOrAdmin")
+            .Produces<Result>(StatusCodes.Status200OK)
+            .Produces<Result>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Cart");
 
-            group.MapDelete("/items/{productId}", async ([FromServices] CartService _service, [FromServices] IValidator<CartDto> validator, [FromQuery] string productId, [FromQuery] int? quantity, HttpContext httpContext, ILoggerFactory loggerFactory) =>
+            group.MapDelete("/items/{productId}", async (
+                [FromServices] CartService _cartService, 
+                [FromServices] IValidator<CartDto> validator, 
+                [FromQuery] string productId,
+                [FromQuery] int? quantity, 
+                HttpContext httpContext, 
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("DELETE/Cart/product called to delete {ProductId} from cart", productId);
@@ -86,7 +90,7 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 var qty = quantity ?? 1;
 
-                var deleted = await _service.DeleteProductFromCartAsync(userId, productId, qty);
+                var deleted = await _cartService.DeleteProductFromCartAsync(userId, productId, qty);
                 logger.LogInformation(deleted ? "Deleted products{productId} from cart" : "Failed to delete {productId} from cart", productId);
 
                 return deleted
@@ -94,11 +98,18 @@ namespace MinimalEshop.Presentation.RouteGroup
                     : Results.NotFound(Result.Fail(null, "Product not found or quantity invalid.", StatusCodes.Status404NotFound));
             })
              .RequireAuthorization("UserOrAdmin")
+             .Produces<Result>(StatusCodes.Status200OK)
+             .Produces<Result>(StatusCodes.Status404NotFound)
+             .Produces(StatusCodes.Status401Unauthorized)
+             .Produces(StatusCodes.Status403Forbidden)
              .WithTags("Cart");
 
 
 
-            group.MapGet("/", async (HttpContext context, [FromServices] CartService _service, ILoggerFactory loggerFactory) =>
+            group.MapGet("/", async (
+                HttpContext context, 
+                [FromServices] CartService _cartService,
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("CartRouteLogger");
                 logger.LogInformation("GET/Cart called to get cart")
@@ -110,15 +121,20 @@ namespace MinimalEshop.Presentation.RouteGroup
                     return Results.Json(Result.Fail(null, "Authentication is required.", StatusCodes.Status401Unauthorized),
                                         statusCode: StatusCodes.Status401Unauthorized);
 
-                var cart = await _service.GetCartByUserIdAsync(userId);
+                var cart = await _cartService.GetCartByUserIdAsync(userId);
                 if (cart == null)
                     return Results.NotFound(Result.Fail(null, "Cart not found for the specified user.", StatusCodes.Status404NotFound));
 
                 logger.LogInformation("Cart Viewed");
                 return Results.Ok(Result.Ok(cart, null, StatusCodes.Status200OK));
 
-            }).RequireAuthorization("UserOrAdmin")
-              .WithTags("Cart");
+            })
+             .RequireAuthorization("UserOrAdmin")
+             .Produces<Result<Cart>>(StatusCodes.Status200OK)
+             .Produces<Result>(StatusCodes.Status404NotFound)
+             .Produces(StatusCodes.Status401Unauthorized)
+             .Produces(StatusCodes.Status403Forbidden)
+             .WithTags("Cart");
 
             return group;
         }

@@ -10,22 +10,34 @@ namespace MinimalEshop.Presentation.RouteGroup
     {
         public static RouteGroupBuilder OrderAPI(this RouteGroupBuilder group)
         {
-            group.MapPost("/", async (ClaimsPrincipal user, [FromServices] OrderService orderService) =>
+            group.MapPost("/", async (
+                ClaimsPrincipal user, 
+                [FromServices] OrderService _orderService) =>
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                var result = await orderService.CheckOutAsync(userId);
+                var result = await _orderService.CheckOutAsync(userId);
 
                 if (!result.Success)
                     return Results.BadRequest(result);
 
                 return Results.Ok(result);
 
-            }).RequireAuthorization("UserOrAdmin")
+            })
+            .RequireAuthorization("UserOrAdmin")
+            .Produces<Result>(StatusCodes.Status200OK)
+            .Produces<Result>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Order");
 
 
-            group.MapPost("/payment", async (PaymentRequest request, IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, OrderService orderService, ClaimsPrincipal user) =>
+            group.MapPost("/payment", async (
+                PaymentRequest request,
+                IHttpClientFactory httpClientFactory,
+                ILoggerFactory loggerFactory,
+                OrderService _orderService, 
+                ClaimsPrincipal user) =>
             {
                 var logger = loggerFactory.CreateLogger("PaymentProcess");
                 logger.LogInformation("Payment processing started");
@@ -75,7 +87,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                 var confirmResult = await confirmResponse.Content.ReadFromJsonAsync<ConfirmPaymentIntentResult>();
                 var paymentMethodEnum = Enum.Parse<MinimalEshop.Application.Domain.Enums.PaymentMethod>(request.PaymentMethod, true);
 
-                var dbResult = await orderService.ProcessPaymentAsync(userId, paymentMethodEnum);
+                var dbResult = await _orderService.ProcessPaymentAsync(userId, paymentMethodEnum);
 
                 if (!dbResult.Success)
                     return Results.BadRequest(new { message = dbResult.Message });
@@ -86,10 +98,17 @@ namespace MinimalEshop.Presentation.RouteGroup
                     stripeStatus = confirmResult.status
                 });
             })
-             .WithTags("Order")
-             .RequireAuthorization("UserOrAdmin");
+             .RequireAuthorization("UserOrAdmin")
+             .Produces<Result>(StatusCodes.Status200OK)
+             .Produces<Result>(StatusCodes.Status400BadRequest)
+             .Produces(StatusCodes.Status401Unauthorized)
+             .Produces(StatusCodes.Status403Forbidden)
+             .WithTags("Order");
 
-            group.MapGet("/", async (ClaimsPrincipal user, [FromServices] OrderService orderService, ILoggerFactory loggerFactory) =>
+            group.MapGet("/", async (
+                ClaimsPrincipal user,
+                [FromServices] OrderService _orderService,
+                ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger("OrderRouteLogger");
                 logger.LogInformation("GET/ Getting Order details");
@@ -99,7 +118,7 @@ namespace MinimalEshop.Presentation.RouteGroup
                 if (string.IsNullOrEmpty(userId))
                     return Results.Unauthorized();
 
-                var result = await orderService.GetOrderDetailsAsync(userId);
+                var result = await _orderService.GetOrderDetailsAsync(userId);
 
                 if (!result.Success)
                     return Results.BadRequest(Result.Fail(null, result.Message, StatusCodes.Status400BadRequest));
@@ -107,8 +126,13 @@ namespace MinimalEshop.Presentation.RouteGroup
                 logger.LogInformation("Retrieved Order details");
 
                 return Results.Ok(Result.Ok(result.Data, result.Message, StatusCodes.Status200OK));
-            }).RequireAuthorization("UserOrAdmin")
-              .WithTags("Order");
+            })
+            .RequireAuthorization("UserOrAdmin")
+            .Produces<Result<List<OrderDto>>>(StatusCodes.Status200OK)
+            .Produces<Result>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .WithTags("Order");
 
             return group;
         }

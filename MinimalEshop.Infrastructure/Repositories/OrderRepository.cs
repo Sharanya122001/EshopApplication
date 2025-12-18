@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace MinimalEshop.Infrastructure.Repositories
 {
-    public class OrderRepository : IOrder
+    public class OrderRepository : IOrderRepo
     {
         private readonly MongoDbContext _context;
         public OrderRepository(MongoDbContext context)

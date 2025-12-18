@@ -9,8 +9,8 @@ namespace MinimalEshop.Application.Service
 {
     public class OrderService
     {
-        private readonly IOrder _context;
-        public OrderService(IOrder context)
+        private readonly IOrderRepo _context;
+        public OrderService(IOrderRepo context)
         {
             _context = context;
         }

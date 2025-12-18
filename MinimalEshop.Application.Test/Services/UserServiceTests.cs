@@ -9,14 +9,14 @@ namespace MinimalEshop.Application.Test.Services
     public class UserServiceTests
     {
         private readonly UserService _userService;
-        private readonly Mock<IUser> _userRepositoryMock;
+        private readonly Mock<IUserRepo> _userRepositoryMock;
         private readonly Mock<ITokenService> _tokenServiceMock;
         private readonly IFixture _fixture;
 
         public UserServiceTests()
         {
             _fixture = new Fixture();
-            _userRepositoryMock = new Mock<IUser>();
+            _userRepositoryMock = new Mock<IUserRepo>();
             _tokenServiceMock = new Mock<ITokenService>();
 
             _userService = new UserService(_userRepositoryMock.Object, _tokenServiceMock.Object);

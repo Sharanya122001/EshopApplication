@@ -142,8 +142,8 @@ namespace MinimalEshop.Application.Test.Services
     public class CartServiceTests
     {
         private readonly CartService _cartService;
-        private readonly Mock<IProduct> _productRepositoryMock;
-        private readonly Mock<ICart> _cartRepositoryMock;
+        private readonly Mock<IProductRepo> _productRepositoryMock;
+        private readonly Mock<ICartRepo> _cartRepositoryMock;
         private readonly Mock<ICacheService> _cacheMock;
         private readonly IFixture _fixture;
 
@@ -157,8 +157,8 @@ namespace MinimalEshop.Application.Test.Services
                 .With(p => p.Price, 100)
             );
 
-            _cartRepositoryMock = new Mock<ICart>();
-            _productRepositoryMock = new Mock<IProduct>();
+            _cartRepositoryMock = new Mock<ICartRepo>();
+            _productRepositoryMock = new Mock<IProductRepo>();
             _cacheMock = new Mock<ICacheService>();
 
             _cartService = new CartService(
