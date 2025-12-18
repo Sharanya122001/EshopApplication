@@ -81,6 +81,8 @@ namespace Presentation
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            builder.Services.AddValidatorsFromAssemblyContaining<LoginDtoValidation>();
+
 
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ICacheService, CacheService>();
@@ -155,11 +157,7 @@ namespace Presentation
                 });
             });
             //registered redis cache
-            builder.Services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = builder.Configuration["Redis:Configuration"];
-                options.InstanceName = builder.Configuration["Redis:InstanceName"];
-            });
+            builder.Services.AddStackExchangeRedisCache(Options => { Options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs"; Options.InstanceName = "MinimalEshopCacheInstance"; });
 
             var app = builder.Build();
 

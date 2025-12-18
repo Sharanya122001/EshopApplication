@@ -20,7 +20,7 @@ namespace MinimalEshop.Infrastructure.Context
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>().ToCollection("Products");
-            modelBuilder.Entity<Category>().ToCollection("Categorie");
+            modelBuilder.Entity<Category>().ToCollection("Categories");
             modelBuilder.Entity<Cart>().ToCollection("Cart");
             modelBuilder.Entity<Order>().ToCollection("Order");
             modelBuilder.Entity<User>().ToCollection("User");
