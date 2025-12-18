@@ -27,7 +27,6 @@ namespace MinimalEshop.Presentation.RouteGroup
 
             })
             .RequireAuthorization("UserOrAdmin")
-            .Produces<List<Product>>(StatusCodes.Status200OK)
             .WithTags("Product");
 
             group.MapGet("/search", async (
@@ -45,9 +44,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(results, null, StatusCodes.Status200OK));
             })
             .RequireAuthorization("UserOrAdmin")
-            .Produces<List<Product>>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
             group.MapPost("/", async (
@@ -74,10 +70,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(created, "Product created", StatusCodes.Status201Created));
             })
             .RequireAuthorization("AdminOnly")
-            .Produces<Product>(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
             group.MapPut("/", async (
@@ -105,10 +97,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(updated, updated ? "Product updated" : "Product update failed", StatusCodes.Status200OK));
             })
             .RequireAuthorization("AdminOnly")
-            .Produces<bool>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
             group.MapDelete("/", async (
@@ -139,10 +127,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(deleted, deleted ? "Product deleted" : "Product delete failed", StatusCodes.Status200OK));
             })
             .RequireAuthorization("AdminOnly")
-            .Produces<bool>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Product");
 
             return group;

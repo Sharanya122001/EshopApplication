@@ -25,10 +25,6 @@ namespace MinimalEshop.Presentation.RouteGroup
 
             })
             .RequireAuthorization("UserOrAdmin")
-            .Produces<Result>(StatusCodes.Status200OK)
-            .Produces<Result>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Order");
 
 
@@ -99,10 +95,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 });
             })
              .RequireAuthorization("UserOrAdmin")
-             .Produces<Result>(StatusCodes.Status200OK)
-             .Produces<Result>(StatusCodes.Status400BadRequest)
-             .Produces(StatusCodes.Status401Unauthorized)
-             .Produces(StatusCodes.Status403Forbidden)
              .WithTags("Order");
 
             group.MapGet("/", async (
@@ -128,10 +120,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(result.Data, result.Message, StatusCodes.Status200OK));
             })
             .RequireAuthorization("UserOrAdmin")
-            .Produces<Result<List<OrderDto>>>(StatusCodes.Status200OK)
-            .Produces<Result>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Order");
 
             return group;

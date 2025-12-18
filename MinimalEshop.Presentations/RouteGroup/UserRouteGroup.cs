@@ -48,8 +48,6 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 return Results.BadRequest(Result.Fail(null, "User registration failed.", StatusCodes.Status400BadRequest));
             })
-            .Produces<Result<User>>(StatusCodes.Status201Created)
-            .Produces(StatusCodes.Status400BadRequest)
             .WithTags("User");
 
             group.MapPost("/Login", async (
@@ -81,9 +79,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                 return Results.Ok(Result.Ok(new { Token = token }, null, StatusCodes.Status200OK));
 
             })
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
             .WithTags("User");
 
             return group;

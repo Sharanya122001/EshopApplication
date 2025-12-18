@@ -51,10 +51,6 @@ namespace MinimalEshop.Presentation.RouteGroup
 
             })
             .RequireAuthorization("UserOrAdmin")
-            .Produces<Result>(StatusCodes.Status200OK)
-            .Produces<Result>(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status401Unauthorized)
-            .Produces(StatusCodes.Status403Forbidden)
             .WithTags("Cart");
 
             group.MapDelete("/items/{productId}", async (
@@ -98,10 +94,6 @@ namespace MinimalEshop.Presentation.RouteGroup
                     : Results.NotFound(Result.Fail(null, "Product not found or quantity invalid.", StatusCodes.Status404NotFound));
             })
              .RequireAuthorization("UserOrAdmin")
-             .Produces<Result>(StatusCodes.Status200OK)
-             .Produces<Result>(StatusCodes.Status404NotFound)
-             .Produces(StatusCodes.Status401Unauthorized)
-             .Produces(StatusCodes.Status403Forbidden)
              .WithTags("Cart");
 
 
@@ -130,10 +122,6 @@ namespace MinimalEshop.Presentation.RouteGroup
 
             })
              .RequireAuthorization("UserOrAdmin")
-             .Produces<Result<Cart>>(StatusCodes.Status200OK)
-             .Produces<Result>(StatusCodes.Status404NotFound)
-             .Produces(StatusCodes.Status401Unauthorized)
-             .Produces(StatusCodes.Status403Forbidden)
              .WithTags("Cart");
 
             return group;
