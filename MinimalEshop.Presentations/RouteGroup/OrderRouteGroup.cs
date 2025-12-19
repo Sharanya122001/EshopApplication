@@ -79,14 +79,17 @@ namespace MinimalEshop.Presentation.RouteGroup
 
                 if (!confirmResponse.IsSuccessStatusCode)
                     return Results.BadRequest(new { message = "Stripe PaymentIntent confirmation failed" });
+
                 //reads the confirmed paymentintent result
                 var confirmResult = await confirmResponse.Content.ReadFromJsonAsync<ConfirmPaymentIntentResult>();
+
                 var paymentMethodEnum = Enum.Parse<MinimalEshop.Application.Domain.Enums.PaymentMethod>(request.PaymentMethod, true);
 
                 var dbResult = await _orderService.ProcessPaymentAsync(userId, paymentMethodEnum);
 
                 if (!dbResult.Success)
                     return Results.BadRequest(new { message = dbResult.Message });
+
                 return Results.Ok(new
                 {
                     message = "Payment successful",
@@ -96,6 +99,7 @@ namespace MinimalEshop.Presentation.RouteGroup
             })
              .RequireAuthorization("UserOrAdmin")
              .WithTags("Order");
+
 
             group.MapGet("/", async (
                 ClaimsPrincipal user,

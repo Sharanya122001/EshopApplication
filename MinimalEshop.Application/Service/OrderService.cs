@@ -89,8 +89,6 @@ namespace MinimalEshop.Application.Service
                     Message = "Invalid payment method."
                 };
             }
-
-
             var order = await _context.GetLatestOrderAsync(userId);
 
             if (order == null)
