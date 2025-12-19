@@ -1,3 +1,4 @@
+using CorrelationId.DependencyInjection;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,6 +18,8 @@ using MongoDB.Driver;
 using Serilog;
 using System.Reflection;
 using System.Text;
+using CorrelationId;
+
 
 
 
@@ -158,6 +161,11 @@ namespace Presentation
             });
             //registered redis cache
             builder.Services.AddStackExchangeRedisCache(Options => { Options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs"; Options.InstanceName = "MinimalEshopCacheInstance"; });
+            builder.Services.AddDefaultCorrelationId(options =>
+            {
+                options.IncludeInResponse = true;
+                options.UpdateTraceIdentifier = true;
+            });
 
             var app = builder.Build();
 
@@ -165,6 +173,8 @@ namespace Presentation
             app.UseSwaggerUI();
 
             app.UseSerilogRequestLogging();
+            app.UseCorrelationId();
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<AuthResponseMiddleware>();
