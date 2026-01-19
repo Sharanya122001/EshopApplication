@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MinimalEshop.Application.Helpers;
 using MinimalEshop.Application.Interface;
 using MinimalEshop.Application.Service;
 using MinimalEshop.Application.Validator;
@@ -123,6 +124,55 @@ namespace Presentation
             {
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "Admin"));
+            });
+
+   builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDBSettings"));
+            builder.Services.AddSingleton<IMongoClient>(s =>
+            {
+                var settings = s.GetRequiredService<IOptions<MongoDBSettings>>().Value;
+                return new MongoClient(settings.ConnectionString);
+            });
+
+            builder.Services.AddDbContext<MongoDbContext>(options =>
+            {
+                var mongoSettings = builder.Configuration.GetSection("MongoDBSettings").Get<MongoDBSettings>();
+                options.UseMongoDB(mongoSettings.ConnectionString, mongoSettings.DatabaseName);
+            });
+
+            builder.Services.AddScoped<IUserRepo, UserRepository>();
+            builder.Services.AddScoped<IProductRepo, ProductRepository>();
+            builder.Services.AddScoped<IOrderRepo, OrderRepository>();
+            builder.Services.AddScoped<ICounterRepo, CounterRepository>();
+            builder.Services.AddScoped<ICartRepo, CartRepository>();
+
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<OrderService>();
+            builder.Services.AddScoped<CartService>();
+            builder.Services.AddScoped<CategoryService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<ICacheService, CacheService>();
+            builder.Services.AddScoped<SqsOrderPublisher>();
+
+            builder.Services.AddHostedService<SqsPaymentResultConsumer>();
+            builder.Services.AddSingleton<ISnsNotificationService, SnsNotificationService>();
+            builder.Services.AddScoped<IEmailContentBuilder, EmailContentBuilder>();
+
+
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            builder.Services.AddValidatorsFromAssemblyContaining<LoginDtoValidation>();
+
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "redis-11198.crce263.ap-south-1-1.ec2.cloud.redislabs.com:11198,password=50wCLUHaUvPGMpf3l1QjH7ExjxRL0bZs";
+                options.InstanceName = "MinimalEshopCacheInstance";
+            });
+
+            builder.Services.AddDefaultCorrelationId(options =>
+            {
+                options.IncludeInResponse = true;
+                options.UpdateTraceIdentifier = true;
             });
 
             builder.Services.AddEndpointsApiExplorer();
